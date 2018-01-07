@@ -11,7 +11,7 @@ namespace AnarchocapitalismBot.Exchanges
 {
     public partial class ExmoExchange
     {
-        private struct TickerEntry
+        private struct TickerEntry : ITickerEntry
         {
             [JsonProperty("sell_price")]
             public decimal SellPrice;
@@ -20,6 +20,11 @@ namespace AnarchocapitalismBot.Exchanges
 
             [JsonProperty("last_trade")]
             public decimal LastTrade;
+
+            // ITickerEntry
+            decimal ITickerEntry.HighestBidPrice => this.BuyPrice;
+            decimal ITickerEntry.LowestAskPrice  => this.SellPrice;
+            decimal ITickerEntry.LastTradePrice  => this.LastTrade;
         }
     }
 }

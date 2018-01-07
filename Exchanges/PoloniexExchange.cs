@@ -22,7 +22,7 @@ namespace AnarchocapitalismBot.Exchanges
 
         // Currencies
         public IReadOnlyList<string> SupportedCurrencies { get; private set; } = null;
-        private Dictionary<string, uint> CurrencyIndices = null;
+        private Dictionary<string, uint> SupportedCurrencyIndices = null;
         private Matrix<bool> supportedCurrencyPairs = null;
 
         // PoloniexExchange
@@ -44,29 +44,8 @@ namespace AnarchocapitalismBot.Exchanges
             using (JsonReader jsonReader = new JsonTextReader(streamReader))
             {
                 // Parse response
-                Dictionary<string, PoloniexExchange.TickerEntry> currencyPairs = this.JsonSerializer.Deserialize<Dictionary<string, PoloniexExchange.TickerEntry>>(jsonReader);
-
-                // Generate list of currencies
-                HashSet<string> currencySet = new HashSet<string>();
-                foreach (string currencyPairName in currencyPairs.Keys)
-                {
-                    string[] currencyIds = currencyPairName.Split('_');
-                    currencySet.Add(currencyIds[0]);
-                    currencySet.Add(currencyIds[1]);
-                }
-
-                List<string> supportedCurrencies = currencySet.ToList();
-                supportedCurrencies.Sort();
-                this.SupportedCurrencies = supportedCurrencies;
-
-                this.CurrencyIndices = new Dictionary<string, uint>();
-                for (int i = 0; i < this.SupportedCurrencies.Count; i++)
-                {
-                    this.CurrencyIndices[this.SupportedCurrencies[i]] = (uint)i;
-                }
-
-                // Generate supported pairs
-                this.supportedCurrencyPairs = Matrix<bool>.Fill(BooleanRing.Instance, (uint)this.SupportedCurrencies.Count, (uint)this.SupportedCurrencies.Count, false);
+                Dictionary<string, object> tradingPairs = this.JsonSerializer.Deserialize<Dictionary<string, object>>(jsonReader);
+                (this.SupportedCurrencies, this.SupportedCurrencyIndices, this.supportedCurrencyPairs) = Util.GetSupportedCurrenciesFromTradingPairs(tradingPairs.Keys);
             }
 
             this.Connected = true;
@@ -84,7 +63,7 @@ namespace AnarchocapitalismBot.Exchanges
             this.Connected = false;
 
             this.SupportedCurrencies = null;
-            this.CurrencyIndices = null;
+            this.SupportedCurrencyIndices = null;
             this.supportedCurrencyPairs = null;
 
             return Task.CompletedTask;
@@ -105,26 +84,8 @@ namespace AnarchocapitalismBot.Exchanges
             using (JsonReader jsonReader = new JsonTextReader(streamReader))
             {
                 // Parse response
-                Dictionary<string, PoloniexExchange.TickerEntry> currencyPairs = this.JsonSerializer.Deserialize<Dictionary<string, PoloniexExchange.TickerEntry>>(jsonReader);
-
-                Matrix<decimal> prices = Matrix<decimal>.Fill(DecimalRing.Instance, (uint)this.SupportedCurrencies.Count, (uint)this.SupportedCurrencies.Count, 0);
-
-                foreach (KeyValuePair<string, PoloniexExchange.TickerEntry> pair in currencyPairs)
-                {
-                    string[] currencyIds = pair.Key.Split('_');
-                    uint index0 = this.CurrencyIndices[currencyIds[0]];
-                    uint index1 = this.CurrencyIndices[currencyIds[1]];
-
-                    // c0_c1, c0/c1 = ask, c1 -> c0
-                    prices[index0, index1] = pair.Value.HighestBid;
-                    prices[index0, index1] *= (1m - 0.0025m); // apply fees
-
-                    // c0_c1, c1/c0 = bid, c0 -> c1
-                    prices[index1, index0] = 1 / pair.Value.LowestAsk;
-                    prices[index0, index1] *= (1m - 0.0025m); // apply fees
-                }
-
-                return prices;
+                Dictionary<string, PoloniexExchange.TickerEntry> tradingPairs = this.JsonSerializer.Deserialize<Dictionary<string, PoloniexExchange.TickerEntry>>(jsonReader);
+                return Util.GetSpotPrices(tradingPairs, this.SupportedCurrencies, this.SupportedCurrencyIndices, 0.0025m);
             }
         }
     }

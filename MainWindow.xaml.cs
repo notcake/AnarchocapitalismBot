@@ -22,7 +22,7 @@ namespace AnarchocapitalismBot
     /// </summary>
     public partial class MainWindow : Window
     {
-        private IExchange exchange = new ExmoExchange();
+        private IExchange exchange = new PoloniexExchange();
 
         public MainWindow()
         {

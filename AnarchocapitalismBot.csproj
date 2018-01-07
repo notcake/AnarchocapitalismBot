@@ -73,7 +73,12 @@
     <Compile Include="Exchanges\ExchangeAttribute.cs" />
     <Compile Include="Exchanges\ExmoExchange.cs" />
     <Compile Include="Exchanges\IExchange.cs" />
+    <Compile Include="Exchanges\ITickerEntry.cs" />
+    <Compile Include="Exchanges\LiquiExchange.cs" />
+    <Compile Include="Exchanges\LiquiExchange.Info.cs" />
+    <Compile Include="Exchanges\LiquiExchange.TickerEntry.cs" />
     <Compile Include="Exchanges\PoloniexExchange.cs" />
+    <Compile Include="Exchanges\Util.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
