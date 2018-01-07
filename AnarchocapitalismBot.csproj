@@ -72,6 +72,8 @@
     <Compile Include="ArbitragePathSemiring.cs" />
     <Compile Include="Exchanges\ExchangeAttribute.cs" />
     <Compile Include="Exchanges\ExmoExchange.cs" />
+    <Compile Include="Exchanges\ExxExchange.cs" />
+    <Compile Include="Exchanges\ExxExchange.TickerEntry.cs" />
     <Compile Include="Exchanges\IExchange.cs" />
     <Compile Include="Exchanges\ITickerEntry.cs" />
     <Compile Include="Exchanges\LiquiExchange.cs" />

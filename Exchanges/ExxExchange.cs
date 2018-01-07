@@ -10,12 +10,11 @@ using Newtonsoft.Json;
 
 namespace AnarchocapitalismBot.Exchanges
 {
-    // Disable this one for now since the API barely works
-    // [Exchange]
-    public partial class LiquiExchange : IExchange
+    [Exchange]
+    public partial class ExxExchange : IExchange
     {
         // IExchange
-        public string Name => "Liqui";
+        public string Name => "EXX";
 
         // Connection
         public bool Connected { get; private set; } = false;
@@ -26,11 +25,10 @@ namespace AnarchocapitalismBot.Exchanges
         private Dictionary<string, uint> SupportedCurrencyIndices = null;
         private Matrix<bool> supportedCurrencyPairs = null;
 
-        // LiquiExchange
+        // ExxExchange
         private JsonSerializer JsonSerializer = new JsonSerializer();
-        private string AllTradingPairs;
 
-        public LiquiExchange() { }
+        public ExxExchange() { }
 
         // IExchange
         // Connection
@@ -38,7 +36,7 @@ namespace AnarchocapitalismBot.Exchanges
         {
             if (this.Connected) { return true; }
 
-            WebRequest httpWebRequest = HttpWebRequest.Create("https://api.liqui.io/api/3/info");
+            WebRequest httpWebRequest = HttpWebRequest.Create("https://api.exx.com/data/v1/tickers");
 
             using (WebResponse httpWebResponse = await httpWebRequest.GetResponseAsync())
             using (Stream stream = httpWebResponse.GetResponseStream())
@@ -46,10 +44,8 @@ namespace AnarchocapitalismBot.Exchanges
             using (JsonReader jsonReader = new JsonTextReader(streamReader))
             {
                 // Parse response
-                LiquiExchange.Info info = this.JsonSerializer.Deserialize<LiquiExchange.Info>(jsonReader);
-                (this.SupportedCurrencies, this.SupportedCurrencyIndices, this.supportedCurrencyPairs) = Util.GetSupportedCurrenciesFromTradingPairs(info.Pairs.Keys);
-
-                this.AllTradingPairs = string.Join("-", info.Pairs.Keys);
+                Dictionary<string, object> tradingPairs = this.JsonSerializer.Deserialize<Dictionary<string, object>>(jsonReader);
+                (this.SupportedCurrencies, this.SupportedCurrencyIndices, this.supportedCurrencyPairs) = Util.GetSupportedCurrenciesFromTradingPairs(tradingPairs.Keys);
             }
 
             this.Connected = true;
@@ -80,9 +76,7 @@ namespace AnarchocapitalismBot.Exchanges
         {
             if (!this.Connected) { throw new InvalidOperationException(); }
 
-            // The Liqui API is really shit and fails half the time.
-            // This won't ever work reliably.
-            WebRequest httpWebRequest = HttpWebRequest.Create("https://api.liqui.io/api/3/ticker/" + this.AllTradingPairs + "?ignore_invalid=1");
+            WebRequest httpWebRequest = HttpWebRequest.Create("https://api.exx.com/data/v1/tickers");
 
             using (WebResponse httpWebResponse = await httpWebRequest.GetResponseAsync())
             using (Stream stream = httpWebResponse.GetResponseStream())
@@ -90,8 +84,8 @@ namespace AnarchocapitalismBot.Exchanges
             using (JsonReader jsonReader = new JsonTextReader(streamReader))
             {
                 // Parse response
-                Dictionary<string, LiquiExchange.TickerEntry> tradingPairs = this.JsonSerializer.Deserialize<Dictionary<string, LiquiExchange.TickerEntry>>(jsonReader);
-                return Util.GetSpotPrices(tradingPairs, this.SupportedCurrencies, this.SupportedCurrencyIndices, 0.0025m);
+                Dictionary<string, ExxExchange.TickerEntry> tradingPairs = this.JsonSerializer.Deserialize<Dictionary<string, ExxExchange.TickerEntry>>(jsonReader);
+                return Util.GetSpotPrices(tradingPairs, this.SupportedCurrencies, this.SupportedCurrencyIndices, 0.001m);
             }
         }
     }

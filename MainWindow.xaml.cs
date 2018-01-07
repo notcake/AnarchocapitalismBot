@@ -3,6 +3,7 @@ using AnarchocapitalismBot.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -22,15 +23,38 @@ namespace AnarchocapitalismBot
     /// </summary>
     public partial class MainWindow : Window
     {
-        private IExchange exchange = new PoloniexExchange();
+        private Dictionary<string, IExchange> exchanges = new Dictionary<string, IExchange>();
+        private IExchange exchange = null;
 
         public MainWindow()
         {
             this.InitializeComponent();
+
+            // Populate exchanges
+            foreach (Type type in Assembly.GetExecutingAssembly().GetTypes())
+            {
+                if (type.GetCustomAttribute<ExchangeAttribute>() != null)
+                {
+                    IExchange exchange = (IExchange)type.GetConstructor(Type.EmptyTypes).Invoke(Array.Empty<object>());
+                    this.exchanges.Add(exchange.Name, exchange);
+                }
+            }
+            
+            foreach (string exchangeName in this.exchanges.Keys.OrderBy(x => x))
+            {
+                this.ExchangeComboBox.Items.Add(exchangeName);
+            }
+
+            this.ExchangeComboBox.SelectedIndex = 0;
         }
 
         private async Task Update()
         {
+            if (!this.exchange.Connected)
+            {
+                await this.exchange.ConnectReadOnly();
+            }
+
             IReadOnlyList<string> currencies = this.exchange.SupportedCurrencies;
             Matrix<decimal> prices = await this.exchange.GetSpotPrices();
 
@@ -80,13 +104,21 @@ namespace AnarchocapitalismBot
 
         private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            await this.exchange.ConnectReadOnly();
             await this.Update();
         }
 
         private void FileExit_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
+        }
+
+        private async void ExchangeComboBox_SelectionChanged(object sender, RoutedEventArgs e)
+        {
+            IExchange exchange = this.exchanges[(string)this.ExchangeComboBox.SelectedItem];
+            if (this.exchange == exchange) { return; }
+
+            this.exchange = exchange;
+            await this.Update();
         }
 
         private async void Update_Click(object sender, RoutedEventArgs e)

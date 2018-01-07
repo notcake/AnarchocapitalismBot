@@ -14,16 +14,17 @@
         </Menu>
         <ToolBarTray DockPanel.Dock="Top">
             <ToolBar>
+                <ComboBox x:Name="ExchangeComboBox" Width="128" SelectionChanged="ExchangeComboBox_SelectionChanged"/>
                 <Button Content="Update" Click="Update_Click"/>
             </ToolBar>
         </ToolBarTray>
         <ListView DockPanel.Dock="Bottom" x:Name="ListView">
             <ListView.View>
                 <GridView>
-                    <GridViewColumn Header="Currency"              DisplayMemberBinding="{Binding Name}"/>
-                    <GridViewColumn Header="Best Cycle Multiplier" DisplayMemberBinding="{Binding BestMultiplier}"/>
-                    <GridViewColumn Header="Best Cycle Path"       DisplayMemberBinding="{Binding BestPath}"/>
-                    <GridViewColumn Header="Exchange"              DisplayMemberBinding="{Binding ExchangeName}"/>
+                    <GridViewColumn Header="Currency"        DisplayMemberBinding="{Binding Name}"           Width="64"/>
+                    <GridViewColumn Header="Best Multiplier" DisplayMemberBinding="{Binding BestMultiplier}" Width="96"/>
+                    <GridViewColumn Header="Best Path"       DisplayMemberBinding="{Binding BestPath}"       Width="384"/>
+                    <GridViewColumn Header="Exchange"        DisplayMemberBinding="{Binding ExchangeName}"   Width="128"/>
                 </GridView>
             </ListView.View>
         </ListView>

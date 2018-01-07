@@ -8,8 +8,8 @@ namespace AnarchocapitalismBot.Exchanges
 {
     public interface ITickerEntry
     {
-        decimal HighestBidPrice       { get; }
-        decimal LowestAskPrice      { get; }
-        decimal LastTradePrice { get; }
+        decimal HighestBidPrice { get; }
+        decimal LowestAskPrice  { get; }
+        decimal LastTradePrice  { get; }
     }
 }

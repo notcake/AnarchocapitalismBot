@@ -15,7 +15,7 @@ namespace AnarchocapitalismBot.Exchanges
             HashSet<string> currencySet = new HashSet<string>();
             foreach (string currencyPairName in tradingPairs)
             {
-                string[] currencyIds = currencyPairName.Split('_');
+                string[] currencyIds = currencyPairName.ToUpper().Split('_');
                 currencySet.Add(currencyIds[0]);
                 currencySet.Add(currencyIds[1]);
             }
@@ -33,7 +33,7 @@ namespace AnarchocapitalismBot.Exchanges
             Matrix<bool> supportedCurrencyPairs = Matrix<bool>.Fill(BooleanRing.Instance, (uint)supportedCurrencies.Count, (uint)supportedCurrencies.Count, false);
             foreach (string currencyPairName in tradingPairs)
             {
-                string[] currencyIds = currencyPairName.Split('_');
+                string[] currencyIds = currencyPairName.ToUpper().Split('_');
                 supportedCurrencyPairs[supportedCurrencyIndices[currencyIds[0]], supportedCurrencyIndices[currencyIds[1]]] = true;
                 supportedCurrencyPairs[supportedCurrencyIndices[currencyIds[1]], supportedCurrencyIndices[currencyIds[0]]] = true;
             }
@@ -48,7 +48,7 @@ namespace AnarchocapitalismBot.Exchanges
 
             foreach (KeyValuePair<string, TickerEntryT> pair in tradingPairs)
             {
-                string[] currencyIds = pair.Key.Split('_');
+                string[] currencyIds = pair.Key.ToUpper().Split('_');
                 uint index0 = supportedCurrencyIndices[currencyIds[0]];
                 uint index1 = supportedCurrencyIndices[currencyIds[1]];
 
@@ -56,7 +56,10 @@ namespace AnarchocapitalismBot.Exchanges
                 prices[index0, index1] = pair.Value.HighestBidPrice * (1m - feeFraction); // apply fees
 
                 // c0_c1, c1/c0 = bid, c0 -> c1
-                prices[index1, index0] = 1m / pair.Value.LowestAskPrice * (1m - feeFraction); // apply fees
+                if (pair.Value.LowestAskPrice != 0)
+                {
+                    prices[index1, index0] = 1m / pair.Value.LowestAskPrice * (1m - feeFraction); // apply fees
+                }
             }
 
             return prices;
