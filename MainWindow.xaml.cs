@@ -69,12 +69,6 @@ namespace AnarchocapitalismBot
                     return new ArbitragePath(value, new List<string> { currencies[(int)x], currencies[(int)y] });
                 }
             });
-            Matrix<ArbitragePath> arbitrage2 = arbitrage1 * arbitrage1;
-            Matrix<ArbitragePath> arbitrage3 = arbitrage1 * arbitrage2;
-            Matrix<ArbitragePath> arbitrage4 = arbitrage1 * arbitrage3;
-            Matrix<ArbitragePath> arbitrage5 = arbitrage1 * arbitrage4;
-            Matrix<ArbitragePath> arbitrage6 = arbitrage1 * arbitrage5;
-
             Matrix<ArbitragePath> arbitrage = arbitrage1;
             Matrix<ArbitragePath> arbitrageN = arbitrage1;
             for (int tradeCount = 1; tradeCount < 7; tradeCount++)
