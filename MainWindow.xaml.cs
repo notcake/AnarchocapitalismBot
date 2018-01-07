@@ -25,6 +25,7 @@ namespace AnarchocapitalismBot
     {
         private Dictionary<string, IExchange> exchanges = new Dictionary<string, IExchange>();
         private IExchange exchange = null;
+        private uint maximumTradeCount = 0;
 
         public MainWindow()
         {
@@ -46,6 +47,13 @@ namespace AnarchocapitalismBot
             }
 
             this.ExchangeComboBox.SelectedIndex = 0;
+
+            // Populate maximum trade counts
+            for (uint i = 2; i <= 10; i++)
+            {
+                this.MaximumTradeCountComboBox.Items.Add(i);
+            }
+            this.MaximumTradeCountComboBox.SelectedIndex = 5;
         }
 
         private async Task Update()
@@ -71,7 +79,7 @@ namespace AnarchocapitalismBot
             });
             Matrix<ArbitragePath> arbitrage = arbitrage1;
             Matrix<ArbitragePath> arbitrageN = arbitrage1;
-            for (int tradeCount = 1; tradeCount < 7; tradeCount++)
+            for (int tradeCount = 1; tradeCount < this.maximumTradeCount; tradeCount++)
             {
                 arbitrageN = arbitrage1 * arbitrageN;
                 arbitrage = arbitrage + arbitrageN;
@@ -115,7 +123,18 @@ namespace AnarchocapitalismBot
             await this.Update();
         }
 
-        private async void Update_Click(object sender, RoutedEventArgs e)
+        private async void MaximumTradeCountComboBox_SelectionChanged(object sender, RoutedEventArgs e)
+        {
+            if (this.MaximumTradeCountComboBox.SelectedItem == null) { return; }
+
+            uint maximumTradeCount = (uint)this.MaximumTradeCountComboBox.SelectedItem;
+            if (this.maximumTradeCount == maximumTradeCount) { return; }
+
+            this.maximumTradeCount = maximumTradeCount;
+            await this.Update();
+        }
+
+        private async void Refresh_Click(object sender, RoutedEventArgs e)
         {
             await this.Update();
         }

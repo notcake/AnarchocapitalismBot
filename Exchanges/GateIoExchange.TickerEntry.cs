@@ -28,8 +28,8 @@ namespace AnarchocapitalismBot.Exchanges
             public decimal PercentageChange;
 
             // ITickerEntry
-            decimal ITickerEntry.HighestBidPrice => this.HighestBid;
-            decimal ITickerEntry.LowestAskPrice  => this.LowestAsk;
+            decimal ITickerEntry.HighestBidPrice => 1 / this.LowestAsk;  // These are the wrong way around
+            decimal ITickerEntry.LowestAskPrice  => 1 / this.HighestBid; // These are the wrong way around
             decimal ITickerEntry.LastTradePrice  => this.Last;
 
 			decimal ITickerEntry.Volume24Hours   => this.BaseVolume;

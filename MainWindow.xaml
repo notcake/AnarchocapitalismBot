@@ -15,7 +15,9 @@
         <ToolBarTray DockPanel.Dock="Top">
             <ToolBar>
                 <ComboBox x:Name="ExchangeComboBox" Width="128" SelectionChanged="ExchangeComboBox_SelectionChanged"/>
-                <Button Content="Update" Click="Update_Click"/>
+                <Label Content="Maximum Trades:"/>
+                <ComboBox x:Name="MaximumTradeCountComboBox" Width="72" SelectionChanged="MaximumTradeCountComboBox_SelectionChanged"/>
+                <Button Content="Refresh" Click="Refresh_Click"/>
             </ToolBar>
         </ToolBarTray>
         <ListView DockPanel.Dock="Bottom" x:Name="ListView">
