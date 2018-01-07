@@ -19,10 +19,19 @@
             </ToolBar>
         </ToolBarTray>
         <ListView DockPanel.Dock="Bottom" x:Name="ListView">
+            <ListView.Resources>
+                <Style TargetType="{x:Type ListViewItem}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Good}" Value="true">
+                            <Setter Property="Background" Value="Honeydew"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ListView.Resources>
             <ListView.View>
                 <GridView>
                     <GridViewColumn Header="Currency"        DisplayMemberBinding="{Binding Name}"           Width="64"/>
-                    <GridViewColumn Header="Best Multiplier" DisplayMemberBinding="{Binding BestMultiplier}" Width="96"/>
+                    <GridViewColumn Header="Best Multiplier" DisplayMemberBinding="{Binding BestMultiplier, StringFormat=x{0:0.0000}}" Width="96"/>
                     <GridViewColumn Header="Best Path"       DisplayMemberBinding="{Binding BestPath}"       Width="384"/>
                     <GridViewColumn Header="Exchange"        DisplayMemberBinding="{Binding ExchangeName}"   Width="128"/>
                 </GridView>

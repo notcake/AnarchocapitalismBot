@@ -90,14 +90,14 @@ namespace AnarchocapitalismBot
                     this.ListView.Items.Clear();
                     for (int i = 0; i < currencies.Count; i++)
                     {
-                        this.ListView.Items.Add(new { Name = "", BestMultiplier = "x0.0000", BestPath = "", ExchangeName = "" });
+                        this.ListView.Items.Add(new { Good = false, Name = "", BestMultiplier = 0, BestPath = "", ExchangeName = "" });
                     }
                 }
 
                 for (int i = 0; i < currencies.Count; i++)
                 {
                     ArbitragePath arbitragePath = arbitrage[(uint)i, (uint)i];
-                    this.ListView.Items[i] = new { Name = currencies[i], BestMultiplier = "x" + arbitragePath.Multiplier.ToString("0.0000"), BestPath = string.Join(" -> ", arbitragePath.Currencies), ExchangeName = this.exchange.Name };
+                    this.ListView.Items[i] = new { Good = arbitragePath.Multiplier > 1.00m, Name = currencies[i], BestMultiplier = arbitragePath.Multiplier, BestPath = string.Join(" -> ", arbitragePath.Currencies), ExchangeName = this.exchange.Name };
                 }
             });
         }
