@@ -14,6 +14,7 @@ namespace AnarchocapitalismBot.Exchanges
         // Connection
         Task<bool> ConnectReadOnly();
         Task<bool> ConnectReadWrite();
+        Task Disconnect();
         bool Connected { get; }
         bool TradingReady { get; }
 

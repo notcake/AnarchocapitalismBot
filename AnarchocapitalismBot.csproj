@@ -71,6 +71,7 @@
     <Compile Include="ArbitragePath.cs" />
     <Compile Include="ArbitragePathSemiring.cs" />
     <Compile Include="Exchanges\ExchangeAttribute.cs" />
+    <Compile Include="Exchanges\ExmoExchange.cs" />
     <Compile Include="Exchanges\IExchange.cs" />
     <Compile Include="Exchanges\PoloniexExchange.cs" />
     <Compile Include="MainWindow.xaml.cs">
@@ -101,7 +102,8 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <Compile Include="Exchanges\PoloniexExchange.ReturnTickerEntry.cs" />
+    <Compile Include="Exchanges\PoloniexExchange.TickerEntry.cs" />
+    <Compile Include="Exchanges\ExmoExchange.TickerEntry.cs" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

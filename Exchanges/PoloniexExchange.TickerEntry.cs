@@ -11,7 +11,7 @@ namespace AnarchocapitalismBot.Exchanges
 {
     public partial class PoloniexExchange
     {
-		private struct ReturnTickerEntry
+		private struct TickerEntry
         {
             [JsonProperty("lowestAsk")]
             public decimal LowestAsk;

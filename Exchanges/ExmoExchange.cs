@@ -11,10 +11,10 @@ using Newtonsoft.Json;
 namespace AnarchocapitalismBot.Exchanges
 {
     [Exchange]
-    public partial class PoloniexExchange : IExchange
+    public partial class ExmoExchange : IExchange
     {
         // IExchange
-        public string Name => "Poloniex";
+        public string Name => "EXMO";
 
         // Connection
         public bool Connected    { get; private set; } = false;
@@ -28,7 +28,7 @@ namespace AnarchocapitalismBot.Exchanges
         // PoloniexExchange
         private JsonSerializer JsonSerializer = new JsonSerializer();
 
-        public PoloniexExchange() { }
+        public ExmoExchange() { }
 
         // IExchange
         // Connection
@@ -36,7 +36,7 @@ namespace AnarchocapitalismBot.Exchanges
         {
             if (this.Connected) { return true; }
 
-            WebRequest httpWebRequest = HttpWebRequest.Create("https://poloniex.com/public?command=returnTicker");
+            WebRequest httpWebRequest = HttpWebRequest.Create("https://api.exmo.com/v1/ticker/");
 
             using (WebResponse httpWebResponse = await httpWebRequest.GetResponseAsync())
             using (Stream stream = httpWebResponse.GetResponseStream())
@@ -44,7 +44,7 @@ namespace AnarchocapitalismBot.Exchanges
             using (JsonReader jsonReader = new JsonTextReader(streamReader))
             {
                 // Parse response
-                Dictionary<string, PoloniexExchange.TickerEntry> currencyPairs = this.JsonSerializer.Deserialize<Dictionary<string, PoloniexExchange.TickerEntry>>(jsonReader);
+                Dictionary<string, ExmoExchange.TickerEntry> currencyPairs = this.JsonSerializer.Deserialize<Dictionary<string, ExmoExchange.TickerEntry>>(jsonReader);
 
                 // Generate list of currencies
                 HashSet<string> currencySet = new HashSet<string>();
@@ -92,12 +92,12 @@ namespace AnarchocapitalismBot.Exchanges
 
         // Currencies
         public Matrix<bool> SupportedCurrencyPairs => this.supportedCurrencyPairs.Clone();
-        
+
         public async Task<Matrix<decimal>> GetSpotPrices()
         {
             if (!this.Connected) { throw new InvalidOperationException(); }
-            
-            WebRequest httpWebRequest = HttpWebRequest.Create("https://poloniex.com/public?command=returnTicker");
+
+            WebRequest httpWebRequest = HttpWebRequest.Create("https://api.exmo.com/v1/ticker/");
 
             using (WebResponse httpWebResponse = await httpWebRequest.GetResponseAsync())
             using (Stream stream = httpWebResponse.GetResponseStream())
@@ -105,23 +105,23 @@ namespace AnarchocapitalismBot.Exchanges
             using (JsonReader jsonReader = new JsonTextReader(streamReader))
             {
                 // Parse response
-                Dictionary<string, PoloniexExchange.TickerEntry> currencyPairs = this.JsonSerializer.Deserialize<Dictionary<string, PoloniexExchange.TickerEntry>>(jsonReader);
+                Dictionary<string, ExmoExchange.TickerEntry> currencyPairs = this.JsonSerializer.Deserialize<Dictionary<string, ExmoExchange.TickerEntry>>(jsonReader);
 
                 Matrix<decimal> prices = Matrix<decimal>.Fill(DecimalRing.Instance, (uint)this.SupportedCurrencies.Count, (uint)this.SupportedCurrencies.Count, 0);
 
-                foreach (KeyValuePair<string, PoloniexExchange.TickerEntry> pair in currencyPairs)
+                foreach (KeyValuePair<string, ExmoExchange.TickerEntry> pair in currencyPairs)
                 {
                     string[] currencyIds = pair.Key.Split('_');
                     uint index0 = this.CurrencyIndices[currencyIds[0]];
                     uint index1 = this.CurrencyIndices[currencyIds[1]];
 
                     // c0_c1, c0/c1 = ask, c1 -> c0
-                    prices[index0, index1] = pair.Value.HighestBid;
-                    prices[index0, index1] *= (1m - 0.0025m); // apply fees
+                    prices[index0, index1] = pair.Value.BuyPrice;
+                    prices[index0, index1] *= (1m - 0.002m); // apply fees
 
                     // c0_c1, c1/c0 = bid, c0 -> c1
-                    prices[index1, index0] = 1 / pair.Value.LowestAsk;
-                    prices[index0, index1] *= (1m - 0.0025m); // apply fees
+                    prices[index1, index0] = 1 / pair.Value.SellPrice;
+                    prices[index0, index1] *= (1m - 0.002m); // apply fees
                 }
 
                 return prices;
