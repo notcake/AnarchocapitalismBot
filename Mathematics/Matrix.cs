@@ -18,7 +18,31 @@ namespace AnarchocapitalismBot.Mathematics
         public Matrix(ISemiring<T> semiring, uint height, uint width)
         {
             this.Semiring = semiring;
-            this.Elements = new T[height, width];
+            this.Height = height;
+            this.Width  = width;
+            this.Elements = new T[this.Height, this.Width];
+        }
+
+        public Matrix<T> Clone(Matrix<T> result = null)
+        {
+            if (result != null)
+            {
+                Debug.Assert(result.Width  == this.Width);
+                Debug.Assert(result.Height == this.Height);
+            }
+
+            result = result ?? new Matrix<T>(this.Semiring, this.Height, this.Width);
+            result.Semiring = this.Semiring;
+
+            for (uint y = 0; y < this.Height; y++)
+            {
+                for (uint x = 0; x < this.Width; x++)
+                {
+                    result.Elements[y, x] = this.Elements[y, x];
+                }
+            }
+
+            return result;
         }
 
         public Matrix<T> Add(Matrix<T> b, Matrix<T> result = null)
@@ -80,7 +104,7 @@ namespace AnarchocapitalismBot.Mathematics
         {
             if (result != null)
             {
-                Debug.Assert(result.Width  == this.Width);
+                Debug.Assert(result.Width == this.Width);
                 Debug.Assert(result.Height == this.Height);
             }
 
@@ -98,21 +122,54 @@ namespace AnarchocapitalismBot.Mathematics
             return result;
         }
 
+        public Matrix<U> Map<U>(ISemiring<U> semiring, Func<uint, uint, T, U> f, Matrix<U> result = null)
+        {
+            if (result != null)
+            {
+                Debug.Assert(result.Width == this.Width);
+                Debug.Assert(result.Height == this.Height);
+            }
+
+            result = result ?? new Matrix<U>(semiring, this.Height, this.Width);
+            result.Semiring = semiring;
+
+            for (uint y = 0; y < this.Height; y++)
+            {
+                for (uint x = 0; x < this.Width; x++)
+                {
+                    result.Elements[y, x] = f(y, x, this.Elements[y, x]);
+                }
+            }
+
+            return result;
+        }
+
+        public T this[uint y, uint x]
+        {
+            get { return this.Elements[y, x]; }
+            set { this.Elements[y, x] = value; }
+        }
+
         public static Matrix<T> operator +(Matrix<T> a, Matrix<T> b) => a.Add(b);
         public static Matrix<T> operator *(Matrix<T> a, Matrix<T> b) => a.Multiply(b);
 
-        public static Matrix<T> Zero(ISemiring<T> ring, uint height, uint width)
+        public static Matrix<T> Fill(ISemiring<T> ring, uint height, uint width, T value)
         {
             Matrix<T> matrix = new Matrix<T>(ring, height, width);
             for (uint y = 0; y < matrix.Height; y++)
             {
                 for (uint x = 0; x < matrix.Width; x++)
                 {
-                    matrix.Elements[y, x] = ring.Zero;
+                    matrix.Elements[y, x] = value;
                 }
             }
 
             return matrix;
+        }
+
+        public static Matrix<T> Zero(ISemiring<T> ring, uint height, uint width)
+        {
+            return Matrix<T>.Fill(ring, height, width, ring.Zero);
         }
     }
 }

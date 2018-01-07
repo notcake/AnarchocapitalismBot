@@ -9,6 +9,18 @@ namespace AnarchocapitalismBot.Exchanges
 {
     public interface IExchange
     {
+        string Name { get; }
+
+        // Connection
+        Task<bool> ConnectReadOnly();
+        Task<bool> ConnectReadWrite();
+        bool Connected { get; }
+        bool TradingReady { get; }
+
+        // Currencies
         IReadOnlyList<string> SupportedCurrencies { get; }
+        Matrix<bool> SupportedCurrencyPairs { get; }
+
+        Task<Matrix<decimal>> GetSpotPrices();
     }
 }

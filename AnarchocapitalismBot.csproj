@@ -68,15 +68,19 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="ArbitragePath.cs" />
+    <Compile Include="ArbitragePathSemiring.cs" />
     <Compile Include="Exchanges\ExchangeAttribute.cs" />
     <Compile Include="Exchanges\IExchange.cs" />
+    <Compile Include="Exchanges\PoloniexExchange.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Mathematics\DoubleRing.cs" />
+    <Compile Include="Mathematics\BooleanRing.cs" />
+    <Compile Include="Mathematics\DecimalRing.cs" />
     <Compile Include="Mathematics\ISemiring.cs" />
     <Compile Include="Mathematics\Matrix.cs" />
     <Compile Include="Mathematics\Semiring.cs" />
@@ -97,6 +101,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <Compile Include="Exchanges\PoloniexExchange.ReturnTickerEntry.cs" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

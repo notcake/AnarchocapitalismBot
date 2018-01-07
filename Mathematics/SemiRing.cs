@@ -30,6 +30,6 @@ namespace AnarchocapitalismBot.Mathematics
         public bool IsAdditiveIdentity(T x)       => this.Equals(this.Zero, x);
         public bool IsMultiplicativeIdentity(T x) => this.Equals(this.One,  x);
 
-        public abstract string ToString(T x);
+        virtual public string ToString(T x) => x.ToString();
     }
 }

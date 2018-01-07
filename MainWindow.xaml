@@ -4,9 +4,28 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AnarchocapitalismBot"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
-    <Grid>
-        
-    </Grid>
+        Title="Anarchocapitalism Bot v0.1" Height="768" Width="1024"
+        Loaded="MainWindow_Loaded">
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Header="E_xit" Click="FileExit_Click"/>
+            </MenuItem>
+        </Menu>
+        <ToolBarTray DockPanel.Dock="Top">
+            <ToolBar>
+                <Button Content="Update" Click="Update_Click"/>
+            </ToolBar>
+        </ToolBarTray>
+        <ListView DockPanel.Dock="Bottom" x:Name="ListView">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="Currency"              DisplayMemberBinding="{Binding Name}"/>
+                    <GridViewColumn Header="Best Cycle Multiplier" DisplayMemberBinding="{Binding BestMultiplier}"/>
+                    <GridViewColumn Header="Best Cycle Path"       DisplayMemberBinding="{Binding BestPath}"/>
+                    <GridViewColumn Header="Exchange"              DisplayMemberBinding="{Binding ExchangeName}"/>
+                </GridView>
+            </ListView.View>
+        </ListView>
+    </DockPanel>
 </Window>
