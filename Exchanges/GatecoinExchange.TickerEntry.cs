@@ -9,27 +9,30 @@ using System.Threading.Tasks;
 
 namespace AnarchocapitalismBot.Exchanges
 {
-    public partial class LiquiExchange
+    public partial class GatecoinExchange
     {
         private struct TickerEntry : ITickerEntry
         {
-            [JsonProperty("sell")]
-            public decimal Sell;
-            [JsonProperty("buy")]
-            public decimal Buy;
+            [JsonProperty("currencyPair")]
+            public string CurrencyPair;
+
+            [JsonProperty("bid")]
+            public decimal Bid;
+            [JsonProperty("ask")]
+            public decimal Ask;
 
             [JsonProperty("last")]
             public decimal Last;
 
-            [JsonProperty("vol")]
+            [JsonProperty("volume")]
             public decimal Volume;
 
             // ITickerEntry
-            decimal ITickerEntry.HighestBidPrice => this.Buy;
-            decimal ITickerEntry.LowestAskPrice  => this.Sell;
+            decimal ITickerEntry.HighestBidPrice => this.Bid;
+            decimal ITickerEntry.LowestAskPrice  => this.Ask;
             decimal ITickerEntry.LastTradePrice  => this.Last;
 
-			decimal ITickerEntry.Volume24Hours   => this.Volume;
+            decimal ITickerEntry.Volume24Hours   => this.Volume;
         }
     }
 }

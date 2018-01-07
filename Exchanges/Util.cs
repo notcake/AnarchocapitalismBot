@@ -49,11 +49,13 @@ namespace AnarchocapitalismBot.Exchanges
 
             foreach (KeyValuePair<string, TickerEntryT> pair in tradingPairs)
             {
+                if (pair.Value.Volume24Hours == 0) { continue; }
+
                 string[] currencyIds = pair.Key.ToUpper().Split('_');
                 uint index0 = supportedCurrencyIndices[currencyIds[0]];
                 uint index1 = supportedCurrencyIndices[currencyIds[1]];
 
-                Debug.Assert(pair.Value.HighestBidPrice <= pair.Value.LowestAskPrice);
+                // Debug.Assert(pair.Value.HighestBidPrice <= pair.Value.LowestAskPrice);
 
                 // c0_c1, c0/c1 = ask, c1 -> c0
                 prices[index0, index1] = pair.Value.HighestBidPrice * (1m - feeFraction); // apply fees

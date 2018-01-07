@@ -74,6 +74,10 @@
     <Compile Include="Exchanges\ExmoExchange.cs" />
     <Compile Include="Exchanges\ExxExchange.cs" />
     <Compile Include="Exchanges\ExxExchange.TickerEntry.cs" />
+    <Compile Include="Exchanges\GatecoinExchange.cs" />
+    <Compile Include="Exchanges\GatecoinExchange.TickerEntry.cs" />
+    <Compile Include="Exchanges\GateIoExchange.cs" />
+    <Compile Include="Exchanges\GateIoExchange.TickerEntry.cs" />
     <Compile Include="Exchanges\IExchange.cs" />
     <Compile Include="Exchanges\ITickerEntry.cs" />
     <Compile Include="Exchanges\LiquiExchange.cs" />
@@ -111,6 +115,7 @@
     </EmbeddedResource>
     <Compile Include="Exchanges\PoloniexExchange.TickerEntry.cs" />
     <Compile Include="Exchanges\ExmoExchange.TickerEntry.cs" />
+    <Compile Include="Exchanges\GatecoinExchange.Tickers.cs" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

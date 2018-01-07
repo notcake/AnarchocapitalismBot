@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace AnarchocapitalismBot.Exchanges
 {
-    public partial class PoloniexExchange
+    public partial class GateIoExchange
     {
 		private struct TickerEntry : ITickerEntry
         {

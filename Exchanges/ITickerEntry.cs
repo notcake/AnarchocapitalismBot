@@ -11,5 +11,7 @@ namespace AnarchocapitalismBot.Exchanges
         decimal HighestBidPrice { get; }
         decimal LowestAskPrice  { get; }
         decimal LastTradePrice  { get; }
+
+        decimal Volume24Hours { get; }
     }
 }

@@ -21,10 +21,15 @@ namespace AnarchocapitalismBot.Exchanges
             [JsonProperty("last_trade")]
             public decimal LastTrade;
 
+            [JsonProperty("vol")]
+            public decimal Volume;
+
             // ITickerEntry
             decimal ITickerEntry.HighestBidPrice => this.BuyPrice;
             decimal ITickerEntry.LowestAskPrice  => this.SellPrice;
             decimal ITickerEntry.LastTradePrice  => this.LastTrade;
+
+			decimal ITickerEntry.Volume24Hours   => this.Volume;
         }
     }
 }
