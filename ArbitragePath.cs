@@ -50,6 +50,24 @@ namespace AnarchocapitalismBot
             return result;
         }
 
+        public bool HasStrictSubcycle
+        {
+            get
+            {
+                if (this.Currencies.Count <= 2) { return false; }
+
+                for (int i = 1; i < this.Currencies.Count - 1; i++)
+                {
+                    if (this.Currencies[this.Currencies.Count - 1] == this.Currencies[i])
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        }
+
         public static ArbitragePath Best(ArbitragePath a, ArbitragePath b)
         {
             if (a.Multiplier > b.Multiplier) { return a; }

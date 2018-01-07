@@ -24,31 +24,8 @@ namespace AnarchocapitalismBot
         /// <returns></returns>
         public override ArbitragePath Add(ArbitragePath a, ArbitragePath b)
         {
-            bool aInteresting = true;
-            bool bInteresting = true;
-
-            if (a.Currencies.Count > 2)
-            {
-                for (int i = 1; i < a.Currencies.Count - 1; i++)
-                {
-                    if (a.Currencies[a.Currencies.Count - 1] == a.Currencies[i])
-                    {
-                        aInteresting = false;
-                        break;
-                    }
-                }
-            }
-            if (b.Currencies.Count > 2)
-            {
-                for (int i = 1; i < b.Currencies.Count - 1; i++)
-                {
-                    if (b.Currencies[b.Currencies.Count - 1] == b.Currencies[i])
-                    {
-                        bInteresting = false;
-                        break;
-                    }
-                }
-            }
+            bool aInteresting = !a.HasStrictSubcycle;
+            bool bInteresting = !b.HasStrictSubcycle;
 
             if ( aInteresting && !bInteresting) { return a; }
             if (!aInteresting &&  bInteresting) { return b; }
