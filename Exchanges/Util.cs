@@ -1,5 +1,4 @@
-﻿using AnarchocapitalismBot.Mathematics;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -10,7 +9,7 @@ namespace AnarchocapitalismBot.Exchanges
 {
     public static class Util
     {
-        public static (IExchangeCurrencies, Matrix<bool>) GetSupportedCurrenciesFromTradingPairs(IEnumerable<string> tradingPairs, char separator = '_')
+        public static (IExchangeCurrencies, TradingPairType[,]) GetSupportedCurrenciesFromTradingPairs(IEnumerable<string> tradingPairs, char separator = '_')
         {
             // Generate list of currencies
             HashSet<string> currencySet = new HashSet<string>();
@@ -22,23 +21,23 @@ namespace AnarchocapitalismBot.Exchanges
             }
 
             IExchangeCurrencies currencies = new ExchangeCurrencies(currencySet);
-            
+
             // Generate supported pairs
-            Matrix<bool> supportedCurrencyPairs = Matrix<bool>.Fill(BooleanRing.Instance, (uint)currencies.Count, (uint)currencies.Count, false);
+            TradingPairType[,] tradingPairTable = new TradingPairType[currencies.Count, currencies.Count];
             foreach (string currencyPairName in tradingPairs)
             {
                 string[] currencyIds = currencyPairName.ToUpper().Split('_');
-                supportedCurrencyPairs[(uint)currencies.IndexOf(currencyIds[0]), (uint)currencies.IndexOf(currencyIds[1])] = true;
-                supportedCurrencyPairs[(uint)currencies.IndexOf(currencyIds[1]), (uint)currencies.IndexOf(currencyIds[0])] = true;
+                tradingPairTable[currencies.IndexOf(currencyIds[0]), currencies.IndexOf(currencyIds[1])] = TradingPairType.Sell;
+                tradingPairTable[currencies.IndexOf(currencyIds[1]), currencies.IndexOf(currencyIds[0])] = TradingPairType.Buy;
             }
 
-            return (currencies, supportedCurrencyPairs);
+            return (currencies, tradingPairTable);
         }
 
-        public static Matrix<decimal> GetSpotPrices<TickerEntryT>(IReadOnlyDictionary<string, TickerEntryT> tradingPairs, IExchangeCurrencies currencies, decimal feeFraction, char separator = '_')
+        public static decimal[,] GetSpotPrices<TickerEntryT>(IReadOnlyDictionary<string, TickerEntryT> tradingPairs, IExchangeCurrencies currencies, decimal feeFraction, char separator = '_')
             where TickerEntryT : ITickerEntry
         {
-            Matrix<decimal> prices = Matrix<decimal>.Fill(DecimalRing.Instance, (uint)currencies.Count, (uint)currencies.Count, 0);
+            decimal[,] prices = new decimal[currencies.Count, currencies.Count];
 
             foreach (KeyValuePair<string, TickerEntryT> pair in tradingPairs)
             {

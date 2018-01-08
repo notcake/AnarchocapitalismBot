@@ -1,5 +1,4 @@
-﻿using AnarchocapitalismBot.Mathematics;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,7 +21,7 @@ namespace AnarchocapitalismBot.Exchanges
         IExchangeCurrencies Currencies { get; }
 
         // Trading pairs
-        Matrix<bool> TradingPairs { get; }
-        Task<Matrix<decimal>> GetSpotPrices();
+        TradingPairType[,] TradingPairs { get; }
+        Task<decimal[,]> GetSpotPrices();
     }
 }

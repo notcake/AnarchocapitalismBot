@@ -23,6 +23,22 @@ namespace AnarchocapitalismBot.Mathematics
             this.Elements = new T[this.Height, this.Width];
         }
 
+        public Matrix(ISemiring<T> semiring, T[,] elements)
+        {
+            this.Semiring = semiring;
+            this.Height = (uint)elements.GetLength(0);
+            this.Width  = (uint)elements.GetLength(1);
+            this.Elements = new T[this.Height, this.Width];
+
+            for (uint y = 0; y < this.Height; y++)
+            {
+                for (uint x = 0; x < this.Width; x++)
+                {
+                    this.Elements[y, x] = elements[y, x];
+                }
+            }
+        }
+
         public Matrix<T> Clone(Matrix<T> result = null)
         {
             if (result != null)
@@ -144,6 +160,21 @@ namespace AnarchocapitalismBot.Mathematics
             return result;
         }
 
+        public T[,] ToArray()
+        {
+            T[,] array = new T[this.Height, this.Width];
+
+            for (uint y = 0; y < this.Height; y++)
+            {
+                for (uint x = 0; x < this.Width; x++)
+                {
+                    array[y, x] = this.Elements[y, x];
+                }
+            }
+
+            return array;
+        }
+
         public T this[uint y, uint x]
         {
             get { return this.Elements[y, x]; }
@@ -153,9 +184,9 @@ namespace AnarchocapitalismBot.Mathematics
         public static Matrix<T> operator +(Matrix<T> a, Matrix<T> b) => a.Add(b);
         public static Matrix<T> operator *(Matrix<T> a, Matrix<T> b) => a.Multiply(b);
 
-        public static Matrix<T> Fill(ISemiring<T> ring, uint height, uint width, T value)
+        public static Matrix<T> Fill(ISemiring<T> semiring, uint height, uint width, T value)
         {
-            Matrix<T> matrix = new Matrix<T>(ring, height, width);
+            Matrix<T> matrix = new Matrix<T>(semiring, height, width);
             for (uint y = 0; y < matrix.Height; y++)
             {
                 for (uint x = 0; x < matrix.Width; x++)
@@ -165,6 +196,11 @@ namespace AnarchocapitalismBot.Mathematics
             }
 
             return matrix;
+        }
+
+        public static Matrix<T> FromArray(ISemiring<T> semiring, T[,] elements)
+        {
+            return new Matrix<T>(semiring, elements);
         }
 
         public static Matrix<T> Zero(ISemiring<T> ring, uint height, uint width)

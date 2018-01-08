@@ -22,8 +22,8 @@ namespace AnarchocapitalismBot.Exchanges
         public IExchangeCurrencies Currencies { get; private set; } = null;
 
         // Trading pairs
-        private Matrix<bool> tradingPairs = null;
-        public Matrix<bool> TradingPairs => this.tradingPairs.Clone();
+        private TradingPairType[,] tradingPairs = null;
+        public TradingPairType[,] TradingPairs => (TradingPairType[,])this.tradingPairs.Clone();
 
         // LiquiExchange
         private string AllTradingPairs;
@@ -62,7 +62,7 @@ namespace AnarchocapitalismBot.Exchanges
         }
 
         // Currencies
-        public async Task<Matrix<decimal>> GetSpotPrices()
+        public async Task<decimal[,]> GetSpotPrices()
         {
             if (!this.Connected) { throw new InvalidOperationException(); }
 

@@ -66,9 +66,9 @@ namespace AnarchocapitalismBot
             }
 
             IReadOnlyList<string> currencies = this.exchange.Currencies;
-            Matrix<decimal> prices = await this.exchange.GetSpotPrices();
+            decimal[,] prices = await this.exchange.GetSpotPrices();
 
-            Matrix<ArbitragePath> arbitrage1 = prices.Map(ArbitragePathSemiring.Instance, (y, x, value) =>
+            Matrix<ArbitragePath> arbitrage1 = Matrix<decimal>.FromArray(DecimalRing.Instance, prices).Map(ArbitragePathSemiring.Instance, (y, x, value) =>
             {
                 if (x == y)
                 {

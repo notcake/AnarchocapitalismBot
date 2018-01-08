@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AnarchocapitalismBot.Mathematics;
 
 namespace AnarchocapitalismBot.Exchanges
 {
@@ -21,8 +20,8 @@ namespace AnarchocapitalismBot.Exchanges
         public IExchangeCurrencies Currencies { get; private set; } = null;
 
         // Trading pairs
-        private Matrix<bool> tradingPairs = null;
-        public Matrix<bool> TradingPairs => this.tradingPairs.Clone();
+        private TradingPairType[,] tradingPairs = null;
+        public TradingPairType[,] TradingPairs => (TradingPairType[,])this.tradingPairs.Clone();
 
         // GatecoinExchange
         public GatecoinExchange() { }
@@ -57,7 +56,7 @@ namespace AnarchocapitalismBot.Exchanges
         }
 
         // Trading pairs
-        public async Task<Matrix<decimal>> GetSpotPrices()
+        public async Task<decimal[,]> GetSpotPrices()
         {
             if (!this.Connected) { throw new InvalidOperationException(); }
 
