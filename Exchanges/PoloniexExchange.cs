@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using AnarchocapitalismBot.Mathematics;
-using Newtonsoft.Json;
 
 namespace AnarchocapitalismBot.Exchanges
 {
@@ -21,13 +18,13 @@ namespace AnarchocapitalismBot.Exchanges
         public bool TradingReady { get; private set; } = false;
 
         // Currencies
-        public IReadOnlyList<string> SupportedCurrencies { get; private set; } = null;
-        private Dictionary<string, uint> SupportedCurrencyIndices = null;
-        private Matrix<bool> supportedCurrencyPairs = null;
+        public IExchangeCurrencies Currencies { get; private set; } = null;
+
+        // Trading pairs
+        private Matrix<bool> tradingPairs = null;
+        public Matrix<bool> TradingPairs => this.tradingPairs.Clone();
 
         // PoloniexExchange
-        private JsonSerializer JsonSerializer = new JsonSerializer();
-
         public PoloniexExchange() { }
 
         // IExchange
@@ -36,18 +33,9 @@ namespace AnarchocapitalismBot.Exchanges
         {
             if (this.Connected) { return true; }
 
-            WebRequest httpWebRequest = HttpWebRequest.Create("https://poloniex.com/public?command=returnTicker");
-
-            using (WebResponse httpWebResponse = await httpWebRequest.GetResponseAsync())
-            using (Stream stream = httpWebResponse.GetResponseStream())
-            using (StreamReader streamReader = new StreamReader(stream))
-            using (JsonReader jsonReader = new JsonTextReader(streamReader))
-            {
-                // Parse response
-                Dictionary<string, object> tradingPairs = this.JsonSerializer.Deserialize<Dictionary<string, object>>(jsonReader);
-                (this.SupportedCurrencies, this.SupportedCurrencyIndices, this.supportedCurrencyPairs) = Util.GetSupportedCurrenciesFromTradingPairs(tradingPairs.Keys);
-            }
-
+            Dictionary<string, object> tradingPairs = await Json.DeserializeUrl<Dictionary<string, object>>("https://poloniex.com/public?command=returnTicker");
+            (this.Currencies, this.tradingPairs) = Util.GetSupportedCurrenciesFromTradingPairs(tradingPairs.Keys);
+            
             this.Connected = true;
 
             return true;
@@ -62,31 +50,19 @@ namespace AnarchocapitalismBot.Exchanges
         {
             this.Connected = false;
 
-            this.SupportedCurrencies = null;
-            this.SupportedCurrencyIndices = null;
-            this.supportedCurrencyPairs = null;
+            this.Currencies = null;
+            this.tradingPairs = null;
 
             return Task.CompletedTask;
         }
 
         // Currencies
-        public Matrix<bool> SupportedCurrencyPairs => this.supportedCurrencyPairs.Clone();
-        
         public async Task<Matrix<decimal>> GetSpotPrices()
         {
             if (!this.Connected) { throw new InvalidOperationException(); }
             
-            WebRequest httpWebRequest = HttpWebRequest.Create("https://poloniex.com/public?command=returnTicker");
-
-            using (WebResponse httpWebResponse = await httpWebRequest.GetResponseAsync())
-            using (Stream stream = httpWebResponse.GetResponseStream())
-            using (StreamReader streamReader = new StreamReader(stream))
-            using (JsonReader jsonReader = new JsonTextReader(streamReader))
-            {
-                // Parse response
-                Dictionary<string, PoloniexExchange.TickerEntry> tradingPairs = this.JsonSerializer.Deserialize<Dictionary<string, PoloniexExchange.TickerEntry>>(jsonReader);
-                return Util.GetSpotPrices(tradingPairs, this.SupportedCurrencies, this.SupportedCurrencyIndices, 0.0025m);
-            }
+            Dictionary<string, PoloniexExchange.TickerEntry> tradingPairs = await Json.DeserializeUrl<Dictionary<string, PoloniexExchange.TickerEntry>>("https://poloniex.com/public?command=returnTicker");
+            return Util.GetSpotPrices(tradingPairs, this.Currencies, 0.0025m);
         }
     }
 }

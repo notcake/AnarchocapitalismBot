@@ -19,9 +19,10 @@ namespace AnarchocapitalismBot.Exchanges
         bool TradingReady { get; }
 
         // Currencies
-        IReadOnlyList<string> SupportedCurrencies { get; }
-        Matrix<bool> SupportedCurrencyPairs { get; }
+        IExchangeCurrencies Currencies { get; }
 
+        // Trading pairs
+        Matrix<bool> TradingPairs { get; }
         Task<Matrix<decimal>> GetSpotPrices();
     }
 }

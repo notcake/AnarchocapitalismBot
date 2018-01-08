@@ -71,6 +71,7 @@
     <Compile Include="ArbitragePath.cs" />
     <Compile Include="ArbitragePathSemiring.cs" />
     <Compile Include="Exchanges\ExchangeAttribute.cs" />
+    <Compile Include="Exchanges\ExchangeCurrencies.cs" />
     <Compile Include="Exchanges\ExmoExchange.cs" />
     <Compile Include="Exchanges\ExxExchange.cs" />
     <Compile Include="Exchanges\ExxExchange.TickerEntry.cs" />
@@ -79,12 +80,14 @@
     <Compile Include="Exchanges\GateIoExchange.cs" />
     <Compile Include="Exchanges\GateIoExchange.TickerEntry.cs" />
     <Compile Include="Exchanges\IExchange.cs" />
+    <Compile Include="Exchanges\IExchangeCurrencies.cs" />
     <Compile Include="Exchanges\ITickerEntry.cs" />
     <Compile Include="Exchanges\LiquiExchange.cs" />
     <Compile Include="Exchanges\LiquiExchange.Info.cs" />
     <Compile Include="Exchanges\LiquiExchange.TickerEntry.cs" />
     <Compile Include="Exchanges\PoloniexExchange.cs" />
     <Compile Include="Exchanges\Util.cs" />
+    <Compile Include="Json.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>

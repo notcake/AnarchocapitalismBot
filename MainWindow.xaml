@@ -14,30 +14,55 @@
         </Menu>
         <ToolBarTray DockPanel.Dock="Top">
             <ToolBar>
-                <ComboBox x:Name="ExchangeComboBox" Width="128" SelectionChanged="ExchangeComboBox_SelectionChanged"/>
+                <ComboBox Name="ExchangeComboBox" Width="128" SelectionChanged="ExchangeComboBox_SelectionChanged"/>
                 <Label Content="Maximum Trades:"/>
-                <ComboBox x:Name="MaximumTradeCountComboBox" Width="72" SelectionChanged="MaximumTradeCountComboBox_SelectionChanged"/>
+                <ComboBox Name="MaximumTradeCountComboBox" Width="72" SelectionChanged="MaximumTradeCountComboBox_SelectionChanged"/>
                 <Button Content="Refresh" Click="Refresh_Click"/>
             </ToolBar>
         </ToolBarTray>
-        <ListView DockPanel.Dock="Bottom" x:Name="ListView">
-            <ListView.Resources>
-                <Style TargetType="{x:Type ListViewItem}">
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding Good}" Value="true">
-                            <Setter Property="Background" Value="Honeydew"/>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </ListView.Resources>
-            <ListView.View>
-                <GridView>
-                    <GridViewColumn Header="Currency"        DisplayMemberBinding="{Binding Name}"           Width="64"/>
-                    <GridViewColumn Header="Best Multiplier" DisplayMemberBinding="{Binding BestMultiplier, StringFormat=x{0:0.0000}}" Width="96"/>
-                    <GridViewColumn Header="Best Path"       DisplayMemberBinding="{Binding BestPath}"       Width="384"/>
-                    <GridViewColumn Header="Exchange"        DisplayMemberBinding="{Binding ExchangeName}"   Width="128"/>
-                </GridView>
-            </ListView.View>
-        </ListView>
+        <Grid DockPanel.Dock="Bottom">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="400"/>
+            </Grid.ColumnDefinitions>
+            <ListView Grid.Column="0" Name="CurrencyCyclesListView" SelectionMode="Single" SelectionChanged="CurrencyCyclesListView_SelectionChanged">
+                <ListView.Resources>
+                    <Style TargetType="{x:Type ListViewItem}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Good}" Value="true">
+                                <Setter Property="Background" Value="Honeydew"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ListView.Resources>
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Header="Currency"        DisplayMemberBinding="{Binding Name}"         Width="64"/>
+                        <GridViewColumn Header="Best Multiplier" DisplayMemberBinding="{Binding BestMultiplier, StringFormat=x{0:0.0000}}" Width="96"/>
+                        <GridViewColumn Header="Best Path"       DisplayMemberBinding="{Binding BestPath}"     Width="384"/>
+                        <GridViewColumn Header="Exchange"        DisplayMemberBinding="{Binding ExchangeName}" Width="128"/>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+            <GridSplitter Grid.Column="1"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Stretch"
+                          ShowsPreview="True"
+                          Width="5"/>
+            <DockPanel Grid.Column="2">
+                <ListView DockPanel.Dock="Bottom" Name="ExecutionListView">
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="Type"     DisplayMemberBinding="{Binding Type}"                Width="48"/>
+                            <GridViewColumn Header="Pair"     DisplayMemberBinding="{Binding TradingPair}"         Width="64"/>
+                            <GridViewColumn Header="Quantity" DisplayMemberBinding="{Binding Quantity}"            Width="72"/>
+                            <GridViewColumn Header="From"     DisplayMemberBinding="{Binding SourceCurrency}"      Width="72"/>
+                            <GridViewColumn Header="To"       DisplayMemberBinding="{Binding DestinationCurrency}" Width="72"/>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </DockPanel>
+        </Grid>
     </DockPanel>
 </Window>

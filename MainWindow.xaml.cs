@@ -27,6 +27,8 @@ namespace AnarchocapitalismBot
         private IExchange exchange = null;
         private uint maximumTradeCount = 0;
 
+        // Results
+        
         public MainWindow()
         {
             this.InitializeComponent();
@@ -63,7 +65,7 @@ namespace AnarchocapitalismBot
                 await this.exchange.ConnectReadOnly();
             }
 
-            IReadOnlyList<string> currencies = this.exchange.SupportedCurrencies;
+            IReadOnlyList<string> currencies = this.exchange.Currencies;
             Matrix<decimal> prices = await this.exchange.GetSpotPrices();
 
             Matrix<ArbitragePath> arbitrage1 = prices.Map(ArbitragePathSemiring.Instance, (y, x, value) =>
@@ -87,19 +89,19 @@ namespace AnarchocapitalismBot
 
             await this.Dispatcher.InvokeAsync(() =>
             {
-                if (this.ListView.Items.Count != currencies.Count)
+                if (this.CurrencyCyclesListView.Items.Count != currencies.Count)
                 {
-                    this.ListView.Items.Clear();
+                    this.CurrencyCyclesListView.Items.Clear();
                     for (int i = 0; i < currencies.Count; i++)
                     {
-                        this.ListView.Items.Add(new { Good = false, Name = "", BestMultiplier = 0, BestPath = "", ExchangeName = "" });
+                        this.CurrencyCyclesListView.Items.Add(new { Good = false, Name = "", BestMultiplier = 0, BestPath = "", ExchangeName = "", ArbitragePath = new ArbitragePath(0, new List<string>()) });
                     }
                 }
 
                 for (int i = 0; i < currencies.Count; i++)
                 {
                     ArbitragePath arbitragePath = arbitrage[(uint)i, (uint)i];
-                    this.ListView.Items[i] = new { Good = arbitragePath.Multiplier > 1.00m, Name = currencies[i], BestMultiplier = arbitragePath.Multiplier, BestPath = string.Join(" -> ", arbitragePath.Currencies), ExchangeName = this.exchange.Name };
+                    this.CurrencyCyclesListView.Items[i] = new { Good = arbitragePath.Multiplier > 1.00m, Name = currencies[i], BestMultiplier = arbitragePath.Multiplier, BestPath = string.Join(" -> ", arbitragePath.Currencies), ExchangeName = this.exchange.Name, ArbitragePath = arbitragePath };
                 }
             });
         }
@@ -120,6 +122,9 @@ namespace AnarchocapitalismBot
             if (this.exchange == exchange) { return; }
 
             this.exchange = exchange;
+            this.CurrencyCyclesListView.Items.Clear();
+            this.ExecutionListView.Items.Clear();
+
             await this.Update();
         }
 
@@ -137,6 +142,23 @@ namespace AnarchocapitalismBot
         private async void Refresh_Click(object sender, RoutedEventArgs e)
         {
             await this.Update();
+        }
+
+        private void CurrencyCyclesListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            dynamic selectedItem = this.CurrencyCyclesListView.SelectedItem;
+            if (selectedItem != null)
+            {
+                ArbitragePath arbitragePath = selectedItem.ArbitragePath;
+                for (int i = 1; i < arbitragePath.Currencies.Count; i++)
+                {
+
+                }
+            }
+            else
+            {
+                this.ExecutionListView.Items.Clear();
+            }
         }
     }
 }

@@ -10,7 +10,7 @@ namespace AnarchocapitalismBot.Exchanges
 {
     public static class Util
     {
-        public static (IReadOnlyList<string>, Dictionary<string, uint>, Matrix<bool>) GetSupportedCurrenciesFromTradingPairs(IEnumerable<string> tradingPairs, char separator = '_')
+        public static (IExchangeCurrencies, Matrix<bool>) GetSupportedCurrenciesFromTradingPairs(IEnumerable<string> tradingPairs, char separator = '_')
         {
             // Generate list of currencies
             HashSet<string> currencySet = new HashSet<string>();
@@ -21,39 +21,32 @@ namespace AnarchocapitalismBot.Exchanges
                 currencySet.Add(currencyIds[1]);
             }
 
-            List<string> supportedCurrencies = currencySet.ToList();
-            supportedCurrencies.Sort();
-
-            Dictionary<string, uint> supportedCurrencyIndices = new Dictionary<string, uint>();
-            for (int i = 0; i < supportedCurrencies.Count; i++)
-            {
-                supportedCurrencyIndices[supportedCurrencies[i]] = (uint)i;
-            }
-
+            IExchangeCurrencies currencies = new ExchangeCurrencies(currencySet);
+            
             // Generate supported pairs
-            Matrix<bool> supportedCurrencyPairs = Matrix<bool>.Fill(BooleanRing.Instance, (uint)supportedCurrencies.Count, (uint)supportedCurrencies.Count, false);
+            Matrix<bool> supportedCurrencyPairs = Matrix<bool>.Fill(BooleanRing.Instance, (uint)currencies.Count, (uint)currencies.Count, false);
             foreach (string currencyPairName in tradingPairs)
             {
                 string[] currencyIds = currencyPairName.ToUpper().Split('_');
-                supportedCurrencyPairs[supportedCurrencyIndices[currencyIds[0]], supportedCurrencyIndices[currencyIds[1]]] = true;
-                supportedCurrencyPairs[supportedCurrencyIndices[currencyIds[1]], supportedCurrencyIndices[currencyIds[0]]] = true;
+                supportedCurrencyPairs[(uint)currencies.IndexOf(currencyIds[0]), (uint)currencies.IndexOf(currencyIds[1])] = true;
+                supportedCurrencyPairs[(uint)currencies.IndexOf(currencyIds[1]), (uint)currencies.IndexOf(currencyIds[0])] = true;
             }
 
-            return (supportedCurrencies, supportedCurrencyIndices, supportedCurrencyPairs);
+            return (currencies, supportedCurrencyPairs);
         }
 
-        public static Matrix<decimal> GetSpotPrices<TickerEntryT>(IReadOnlyDictionary<string, TickerEntryT> tradingPairs, IReadOnlyList<string> supportedCurrencies, IReadOnlyDictionary<string, uint> supportedCurrencyIndices, decimal feeFraction, char separator = '_')
+        public static Matrix<decimal> GetSpotPrices<TickerEntryT>(IReadOnlyDictionary<string, TickerEntryT> tradingPairs, IExchangeCurrencies currencies, decimal feeFraction, char separator = '_')
             where TickerEntryT : ITickerEntry
         {
-            Matrix<decimal> prices = Matrix<decimal>.Fill(DecimalRing.Instance, (uint)supportedCurrencies.Count, (uint)supportedCurrencies.Count, 0);
+            Matrix<decimal> prices = Matrix<decimal>.Fill(DecimalRing.Instance, (uint)currencies.Count, (uint)currencies.Count, 0);
 
             foreach (KeyValuePair<string, TickerEntryT> pair in tradingPairs)
             {
                 if (pair.Value.Volume24Hours == 0) { continue; }
 
                 string[] currencyIds = pair.Key.ToUpper().Split('_');
-                uint index0 = supportedCurrencyIndices[currencyIds[0]];
-                uint index1 = supportedCurrencyIndices[currencyIds[1]];
+                uint index0 = (uint)currencies.IndexOf(currencyIds[0]);
+                uint index1 = (uint)currencies.IndexOf(currencyIds[1]);
 
                 // Debug.Assert(pair.Value.HighestBidPrice <= pair.Value.LowestAskPrice);
 
