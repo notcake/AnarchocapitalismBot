@@ -33,7 +33,14 @@ namespace AnarchocapitalismBot
             return ArbitragePath.Best(a, b);
         }
 
-        public override ArbitragePath Multiply(ArbitragePath a, ArbitragePath b) => ArbitragePath.Compose(a, b);
+        public override ArbitragePath Multiply(ArbitragePath a, ArbitragePath b)
+        {
+            // Don't bother building paths if the reuslt is a 0.
+            if (a.Multiplier == 0) { return a; }
+            if (b.Multiplier == 0) { return b; }
+
+            return ArbitragePath.Compose(a, b);
+        }
 
         // Identities
         public override ArbitragePath AdditiveIdentity       => new ArbitragePath(0, new List<string>());
