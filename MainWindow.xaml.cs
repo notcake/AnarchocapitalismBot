@@ -15,6 +15,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace AnarchocapitalismBot
 {
@@ -28,6 +29,7 @@ namespace AnarchocapitalismBot
         private uint maximumTradeCount = 0;
 
         // Results
+        Ticker[,] tickers = null;
         
         public MainWindow()
         {
@@ -56,29 +58,43 @@ namespace AnarchocapitalismBot
                 this.MaximumTradeCountComboBox.Items.Add(i);
             }
             this.MaximumTradeCountComboBox.SelectedIndex = 5;
+
+            // Timer
+            DispatcherTimer timer = new DispatcherTimer();
+            timer.Tick += this.Timer_Tick;
+            timer.Interval = new TimeSpan(0, 0, 0, 0, 400);
+            timer.Start();
         }
 
-        private async Task Update()
+        private async Task UpdateCurrencyCycles()
         {
-            if (!this.exchange.Connected)
+            IExchange exchange = this.exchange;
+
+            if (!exchange.Connected)
             {
-                await this.exchange.ConnectReadOnly();
+                await exchange.ConnectReadOnly();
             }
 
-            IReadOnlyList<string> currencies = this.exchange.Currencies;
-            decimal[,] prices = await this.exchange.GetSpotPrices();
+            this.tickers = await exchange.GetTicker();
+            
+            Matrix<ArbitragePath> arbitrage1 = Matrix<Ticker>.FromArray(NullRing<Ticker>.Instance, this.tickers)
+                .Map(ArbitragePathSemiring.Instance, (y, x, value) =>
+                {
+                    decimal multiplier = 0;
+                    if (value.LowestAskPrice != 0)
+                    {
+                        multiplier = 1m / value.LowestAskPrice * (1m - exchange.FeePercentage * 0.01m);
+                    }
 
-            Matrix<ArbitragePath> arbitrage1 = Matrix<decimal>.FromArray(DecimalRing.Instance, prices).Map(ArbitragePathSemiring.Instance, (y, x, value) =>
-            {
-                if (x == y)
-                {
-                    return new ArbitragePath(value, new List<string> { currencies[(int)x] });
-                }
-                else
-                {
-                    return new ArbitragePath(value, new List<string> { currencies[(int)x], currencies[(int)y] });
-                }
-            });
+                    if (x == y)
+                    {
+                        return new ArbitragePath(multiplier, new List<string> { exchange.Currencies[(int)x] });
+                    }
+                    else
+                    {
+                        return new ArbitragePath(multiplier, new List<string> { exchange.Currencies[(int)x], exchange.Currencies[(int)y] });
+                    }
+                });
             Matrix<ArbitragePath> arbitrage = arbitrage1;
             Matrix<ArbitragePath> arbitrageN = arbitrage1;
             for (int tradeCount = 1; tradeCount < this.maximumTradeCount; tradeCount++)
@@ -89,26 +105,116 @@ namespace AnarchocapitalismBot
 
             await this.Dispatcher.InvokeAsync(() =>
             {
-                if (this.CurrencyCyclesListView.Items.Count != currencies.Count)
+                if (this.CurrencyCyclesListView.Items.Count != exchange.Currencies.Count)
                 {
                     this.CurrencyCyclesListView.Items.Clear();
-                    for (int i = 0; i < currencies.Count; i++)
+                    for (int i = 0; i < exchange.Currencies.Count; i++)
                     {
-                        this.CurrencyCyclesListView.Items.Add(new { Good = false, Name = "", BestMultiplier = 0, BestPath = "", ExchangeName = "", ArbitragePath = new ArbitragePath(0, new List<string>()) });
+                        this.CurrencyCyclesListView.Items.Add(new CurrencyCycleListViewItem { Name = exchange.Currencies[i], Exchange = exchange, ArbitragePath = new ArbitragePath(0, new List<string>()) });
                     }
                 }
 
-                for (int i = 0; i < currencies.Count; i++)
+                this.suppressExecutionUpdate = true;
+                int selectedIndex = this.CurrencyCyclesListView.SelectedIndex;
+                for (int i = 0; i < exchange.Currencies.Count; i++)
                 {
                     ArbitragePath arbitragePath = arbitrage[(uint)i, (uint)i];
-                    this.CurrencyCyclesListView.Items[i] = new { Good = arbitragePath.Multiplier > 1.00m, Name = currencies[i], BestMultiplier = arbitragePath.Multiplier, BestPath = string.Join(" -> ", arbitragePath.Currencies), ExchangeName = this.exchange.Name, ArbitragePath = arbitragePath };
+                    this.CurrencyCyclesListView.Items[i] = new CurrencyCycleListViewItem { Name = exchange.Currencies[i], Exchange = exchange, ArbitragePath = arbitragePath };
                 }
+                this.CurrencyCyclesListView.SelectedIndex = selectedIndex;
+                this.suppressExecutionUpdate = false;
             });
+        }
+
+        CurrencyCycleListViewItem? executionCycle = null;
+        bool updatingExecution = false;
+        private async Task UpdateExecution()
+        {
+            if (this.executionCycle != null)
+            {
+                this.updatingExecution = true;
+
+                int selectedIndex = this.CurrencyCyclesListView.SelectedIndex;
+                CurrencyCycleListViewItem item = executionCycle.Value;
+                
+                ArbitragePath arbitragePath = item.ArbitragePath;
+
+                Ticker[,] tickers = this.tickers;
+
+                decimal sourceQuantity = 0.1m;
+
+                List<ExecutionListViewItem> items = new List<ExecutionListViewItem>();
+                for (int i = 1; i < arbitragePath.Currencies.Count; i++)
+                {
+                    string sourceCurrency      = arbitragePath.Currencies[i - 1];
+                    string destinationCurrency = arbitragePath.Currencies[i];
+                    int sourceCurrencyIndex      = item.Exchange.Currencies.IndexOf(sourceCurrency);
+                    int destinationCurrencyIndex = item.Exchange.Currencies.IndexOf(destinationCurrency);
+
+                    TradeType type;
+                    (string, string) tradingPair;
+                    switch (item.Exchange.TradingPairs[item.Exchange.Currencies.IndexOf(destinationCurrency), item.Exchange.Currencies.IndexOf(sourceCurrency)])
+                    {
+                        case TradingPairType.Buy:
+                            type = TradeType.Buy;
+                            tradingPair = (destinationCurrency, sourceCurrency);
+                            break;
+                        case TradingPairType.Sell:
+                            type = TradeType.Sell;
+                            tradingPair = (sourceCurrency, destinationCurrency);
+                            break;
+                        case TradingPairType.Invalid:
+                        default:
+                            throw new InvalidOperationException();
+                    }
+
+                    Ticker ticker = tickers[item.Exchange.Currencies.IndexOf(tradingPair.Item1), item.Exchange.Currencies.IndexOf(tradingPair.Item2)];
+                    ticker = ticker.Update(await item.Exchange.GetOrderBook(tradingPair));
+
+                    decimal destinationQuantity;
+                    if (type == TradeType.Buy)
+                    {
+                        destinationQuantity = sourceQuantity / ticker.LowestAskPrice * (1m - item.Exchange.FeePercentage * 0.01m);
+                    }
+                    else
+                    {
+                        destinationQuantity = sourceQuantity * ticker.HighestBidPrice * (1m - item.Exchange.FeePercentage * 0.01m);
+                    }
+
+                    items.Add(new ExecutionListViewItem
+                    {
+                        Exchange = item.Exchange,
+                        TradingPair = tradingPair,
+                        Type = type,
+                        Price = type == TradeType.Buy ? ticker.LowestAskPrice : ticker.HighestBidPrice,
+                        Ticker = ticker,
+                        SourceQuantity = sourceQuantity,
+                        DestinationQuantity = destinationQuantity
+                    });
+
+                    sourceQuantity = destinationQuantity;
+                }
+
+                if (this.CurrencyCyclesListView.SelectedIndex == selectedIndex)
+                {
+                    await this.Dispatcher.InvokeAsync(() =>
+                    {
+                        this.ExecutionListView.Items.Clear();
+                        items.ForEach(x => this.ExecutionListView.Items.Add(x));
+                    });
+                }
+
+                this.updatingExecution = false;
+            }
+            else
+            {
+                this.ExecutionListView.Items.Clear();
+            }
         }
 
         private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            await this.Update();
+            await this.UpdateCurrencyCycles();
         }
 
         private void FileExit_Click(object sender, RoutedEventArgs e)
@@ -124,8 +230,9 @@ namespace AnarchocapitalismBot
             this.exchange = exchange;
             this.CurrencyCyclesListView.Items.Clear();
             this.ExecutionListView.Items.Clear();
+            this.executionCycle = null;
 
-            await this.Update();
+            await this.UpdateCurrencyCycles();
         }
 
         private async void MaximumTradeCountComboBox_SelectionChanged(object sender, RoutedEventArgs e)
@@ -136,29 +243,27 @@ namespace AnarchocapitalismBot
             if (this.maximumTradeCount == maximumTradeCount) { return; }
 
             this.maximumTradeCount = maximumTradeCount;
-            await this.Update();
+            await this.UpdateCurrencyCycles();
         }
 
         private async void Refresh_Click(object sender, RoutedEventArgs e)
         {
-            await this.Update();
+            await this.UpdateCurrencyCycles();
         }
 
-        private void CurrencyCyclesListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        bool suppressExecutionUpdate = false;
+        private async void CurrencyCyclesListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            dynamic selectedItem = this.CurrencyCyclesListView.SelectedItem;
-            if (selectedItem != null)
-            {
-                ArbitragePath arbitragePath = selectedItem.ArbitragePath;
-                for (int i = 1; i < arbitragePath.Currencies.Count; i++)
-                {
+            if (this.suppressExecutionUpdate) { return; }
 
-                }
-            }
-            else
-            {
-                this.ExecutionListView.Items.Clear();
-            }
+            this.executionCycle = (CurrencyCycleListViewItem?)this.CurrencyCyclesListView.SelectedItem;
+            await this.UpdateExecution();
+        }
+
+        private async void Timer_Tick(object sender, EventArgs e)
+        {
+            if (this.updatingExecution) { return; }
+            await this.UpdateExecution();
         }
     }
 }

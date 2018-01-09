@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AnarchocapitalismBot"
-        Title="Anarchocapitalism Bot v0.1" Height="768" Width="1024"
+        Title="Anarchocapitalism Bot v0.1" Height="768" Width="1280"
         Loaded="MainWindow_Loaded">
     <DockPanel>
         <Menu DockPanel.Dock="Top">
@@ -21,14 +21,15 @@
             </ToolBar>
         </ToolBarTray>
         <Grid DockPanel.Dock="Bottom">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="400"/>
-            </Grid.ColumnDefinitions>
-            <ListView Grid.Column="0" Name="CurrencyCyclesListView" SelectionMode="Single" SelectionChanged="CurrencyCyclesListView_SelectionChanged">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="200"/>
+            </Grid.RowDefinitions>
+            <ListView Grid.Row="0" Name="CurrencyCyclesListView" SelectionMode="Single" SelectionChanged="CurrencyCyclesListView_SelectionChanged">
                 <ListView.Resources>
                     <Style TargetType="{x:Type ListViewItem}">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding Good}" Value="true">
                                 <Setter Property="Background" Value="Honeydew"/>
@@ -38,27 +39,79 @@
                 </ListView.Resources>
                 <ListView.View>
                     <GridView>
-                        <GridViewColumn Header="Currency"        DisplayMemberBinding="{Binding Name}"         Width="64"/>
-                        <GridViewColumn Header="Best Multiplier" DisplayMemberBinding="{Binding BestMultiplier, StringFormat=x{0:0.0000}}" Width="96"/>
-                        <GridViewColumn Header="Best Path"       DisplayMemberBinding="{Binding BestPath}"     Width="384"/>
-                        <GridViewColumn Header="Exchange"        DisplayMemberBinding="{Binding ExchangeName}" Width="128"/>
+                        <GridViewColumn Header="Currency"        DisplayMemberBinding="{Binding Name}"          Width="64"/>
+                        <GridViewColumn Header="Best Multiplier" Width="96">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Multiplier, StringFormat=x{0:0.0000}}" TextAlignment="Right"></TextBlock>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Header="Best Path"       DisplayMemberBinding="{Binding Path}"          Width="384"/>
+                        <GridViewColumn Header="Exchange"        DisplayMemberBinding="{Binding Exchange.Name}" Width="128"/>
                     </GridView>
                 </ListView.View>
             </ListView>
-            <GridSplitter Grid.Column="1"
-                          HorizontalAlignment="Center"
-                          VerticalAlignment="Stretch"
+            <GridSplitter Grid.Row="1"
+                          HorizontalAlignment="Stretch"
+                          VerticalAlignment="Center"
                           ShowsPreview="True"
-                          Width="5"/>
-            <DockPanel Grid.Column="2">
+                          Height="5"/>
+            <DockPanel Grid.Row="2">
                 <ListView DockPanel.Dock="Bottom" Name="ExecutionListView">
+                    <ListView.Resources>
+                        <Style TargetType="{x:Type ListViewItem}">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        </Style>
+                    </ListView.Resources>
                     <ListView.View>
                         <GridView>
+                            <GridViewColumn Header="Pair"     DisplayMemberBinding="{Binding TradingPairName}"     Width="96"/>
+                            <GridViewColumn Header="Bid" Width="80">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Ticker.HighestBidPrice, StringFormat=0.00000000}" TextAlignment="Right"></TextBlock>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <GridViewColumn Header="Ask" Width="80">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Ticker.LowestAskPrice, StringFormat=0.00000000}" TextAlignment="Right"></TextBlock>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <GridViewColumn Header="Volume" Width="80">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Ticker.Volume24Hours, StringFormat=0.0000}" TextAlignment="Right"></TextBlock>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
                             <GridViewColumn Header="Type"     DisplayMemberBinding="{Binding Type}"                Width="48"/>
-                            <GridViewColumn Header="Pair"     DisplayMemberBinding="{Binding TradingPair}"         Width="64"/>
-                            <GridViewColumn Header="Quantity" DisplayMemberBinding="{Binding Quantity}"            Width="72"/>
-                            <GridViewColumn Header="From"     DisplayMemberBinding="{Binding SourceCurrency}"      Width="72"/>
-                            <GridViewColumn Header="To"       DisplayMemberBinding="{Binding DestinationCurrency}" Width="72"/>
+                            <GridViewColumn Header="Price" Width="88">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Price, StringFormat=@{0:0.00000000}}" TextAlignment="Right"></TextBlock>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <GridViewColumn Header="Quantity" Width="80">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding SourceQuantity, StringFormat=0.00000000}" TextAlignment="Right"></TextBlock>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <GridViewColumn Header="From"     DisplayMemberBinding="{Binding SourceCurrency}"      Width="64"/>
+                            <GridViewColumn Header="To"       DisplayMemberBinding="{Binding DestinationCurrency}" Width="64"/>
+                            <GridViewColumn Header="Quantity" Width="80">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding DestinationQuantity, StringFormat=0.00000000}" TextAlignment="Right"></TextBlock>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
                         </GridView>
                     </ListView.View>
                 </ListView>

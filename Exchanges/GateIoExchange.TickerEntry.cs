@@ -23,16 +23,18 @@ namespace AnarchocapitalismBot.Exchanges
 
             [JsonProperty("baseVolume")]
             public decimal BaseVolume;
+            [JsonProperty("quoteVolume")]
+            public decimal QuoteVolume;
 
             [JsonProperty("percentChange")]
             public decimal PercentageChange;
 
             // ITickerEntry
-            decimal ITickerEntry.HighestBidPrice => 1 / this.LowestAsk;  // These are the wrong way around
-            decimal ITickerEntry.LowestAskPrice  => 1 / this.HighestBid; // These are the wrong way around
+            decimal ITickerEntry.HighestBidPrice => Math.Min(this.HighestBid, this.LowestAsk); // fixup the shitty data returned to be slightly more accurate
+            decimal ITickerEntry.LowestAskPrice  => Math.Max(this.HighestBid, this.LowestAsk); // fixup the shitty data returned to be slightly more accurate
             decimal ITickerEntry.LastTradePrice  => this.Last;
 
-			decimal ITickerEntry.Volume24Hours   => this.BaseVolume;
+			decimal ITickerEntry.Volume24Hours   => this.QuoteVolume; // wrong way around
         }
     }
 }

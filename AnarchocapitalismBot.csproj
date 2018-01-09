@@ -70,6 +70,15 @@
     </Compile>
     <Compile Include="ArbitragePath.cs" />
     <Compile Include="ArbitragePathSemiring.cs" />
+    <Compile Include="CurrencyCycleListViewItem.cs" />
+    <Compile Include="Exchanges\ExmoExchange.OrderBook.cs" />
+    <Compile Include="Exchanges\ExxExchange.OrderBook.cs" />
+    <Compile Include="Exchanges\GatecoinExchange.OrderBook.cs" />
+    <Compile Include="Exchanges\GatecoinExchange.OrderBookEntry.cs" />
+    <Compile Include="Exchanges\GateIoExchange.OrderBook.cs" />
+    <Compile Include="Exchanges\LiquiExchange.OrderBook.cs" />
+    <Compile Include="Exchanges\OrderBook.cs" />
+    <Compile Include="Exchanges\OrderBookEntry.cs" />
     <Compile Include="Exchanges\ExchangeAttribute.cs" />
     <Compile Include="Exchanges\ExchangeCurrencies.cs" />
     <Compile Include="Exchanges\ExmoExchange.cs" />
@@ -86,8 +95,12 @@
     <Compile Include="Exchanges\LiquiExchange.Info.cs" />
     <Compile Include="Exchanges\LiquiExchange.TickerEntry.cs" />
     <Compile Include="Exchanges\PoloniexExchange.cs" />
+    <Compile Include="Exchanges\PoloniexExchange.OrderBook.cs" />
+    <Compile Include="Exchanges\Ticker.cs" />
+    <Compile Include="Exchanges\TradeType.cs" />
     <Compile Include="Exchanges\TradingPairType.cs" />
     <Compile Include="Exchanges\Util.cs" />
+    <Compile Include="ExecutionListViewItem.cs" />
     <Compile Include="Json.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
@@ -98,6 +111,7 @@
     <Compile Include="Mathematics\DecimalRing.cs" />
     <Compile Include="Mathematics\ISemiring.cs" />
     <Compile Include="Mathematics\Matrix.cs" />
+    <Compile Include="Mathematics\NullRing.cs" />
     <Compile Include="Mathematics\Semiring.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>

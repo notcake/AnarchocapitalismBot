@@ -20,6 +20,7 @@ namespace AnarchocapitalismBot.Exchanges
         public IExchangeCurrencies Currencies { get; private set; } = null;
 
         // Trading pairs
+        public decimal FeePercentage => 0.13m;
         private TradingPairType[,] tradingPairs = null;
         public TradingPairType[,] TradingPairs => (TradingPairType[,])this.tradingPairs.Clone();
 
@@ -56,7 +57,7 @@ namespace AnarchocapitalismBot.Exchanges
         }
 
         // Trading pairs
-        public async Task<decimal[,]> GetSpotPrices()
+        public async Task<Ticker[,]> GetTicker()
         {
             if (!this.Connected) { throw new InvalidOperationException(); }
 
@@ -66,7 +67,19 @@ namespace AnarchocapitalismBot.Exchanges
             {
                 tradingPairs[tickerEntry.CurrencyPair.Substring(0, 3) + "_" + tickerEntry.CurrencyPair.Substring(4)] = tickerEntry;
             }
-            return Util.GetSpotPrices(tradingPairs, this.Currencies, 0.0013m);
+            return Util.GetTicker(tradingPairs, this.Currencies);
+        }
+
+        public async Task<Exchanges.OrderBook> GetOrderBook((string, string) tradingPair)
+        {
+            if (!this.Connected) { throw new InvalidOperationException(); }
+
+            GatecoinExchange.OrderBook orderBook = await Json.DeserializeUrl<GatecoinExchange.OrderBook>("https://api.gatecoin.com/Public/MarketDepth/" + tradingPair.Item1 + tradingPair.Item2);
+            return new Exchanges.OrderBook
+            {
+                Asks = orderBook.Ask.Select(x => new Exchanges.OrderBookEntry { Price = x.Price, Quantity = x.Volume }).ToArray(),
+                Bids = orderBook.Bid.Select(x => new Exchanges.OrderBookEntry { Price = x.Price, Quantity = x.Volume }).ToArray()
+            };
         }
     }
 }

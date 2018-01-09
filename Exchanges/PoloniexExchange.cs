@@ -20,6 +20,7 @@ namespace AnarchocapitalismBot.Exchanges
         public IExchangeCurrencies Currencies { get; private set; } = null;
 
         // Trading pairs
+        public decimal FeePercentage => 0.25m;
         private TradingPairType[,] tradingPairs = null;
         public TradingPairType[,] TradingPairs => (TradingPairType[,])this.tradingPairs.Clone();
 
@@ -56,12 +57,24 @@ namespace AnarchocapitalismBot.Exchanges
         }
 
         // Currencies
-        public async Task<decimal[,]> GetSpotPrices()
+        public async Task<Ticker[,]> GetTicker()
         {
             if (!this.Connected) { throw new InvalidOperationException(); }
             
             Dictionary<string, PoloniexExchange.TickerEntry> tradingPairs = await Json.DeserializeUrl<Dictionary<string, PoloniexExchange.TickerEntry>>("https://poloniex.com/public?command=returnTicker");
-            return Util.GetSpotPrices(tradingPairs, this.Currencies, 0.0025m);
+            return Util.GetTicker(tradingPairs, this.Currencies);
+        }
+
+        public async Task<Exchanges.OrderBook> GetOrderBook((string, string) tradingPair)
+        {
+            if (!this.Connected) { throw new InvalidOperationException(); }
+
+            PoloniexExchange.OrderBook orderBook = await Json.DeserializeUrl<PoloniexExchange.OrderBook>("https://poloniex.com/public?command=returnOrderBook&depth=10&currencyPair=" + tradingPair.Item1 + "_" + tradingPair.Item2);
+            return new Exchanges.OrderBook
+            {
+                Asks = orderBook.Ask.Select(x => new OrderBookEntry { Price = x[0], Quantity = x[1] }).Reverse().ToArray(),
+                Bids = orderBook.Bid.Select(x => new OrderBookEntry { Price = x[0], Quantity = x[1] }).ToArray()
+            };
         }
     }
 }

@@ -21,7 +21,9 @@ namespace AnarchocapitalismBot.Exchanges
         IExchangeCurrencies Currencies { get; }
 
         // Trading pairs
+        decimal FeePercentage { get; }
         TradingPairType[,] TradingPairs { get; }
-        Task<decimal[,]> GetSpotPrices();
+        Task<Ticker[,]> GetTicker();
+        Task<OrderBook> GetOrderBook((string, string) tradingPair);
     }
 }

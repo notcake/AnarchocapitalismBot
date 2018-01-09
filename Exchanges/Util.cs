@@ -27,17 +27,17 @@ namespace AnarchocapitalismBot.Exchanges
             foreach (string currencyPairName in tradingPairs)
             {
                 string[] currencyIds = currencyPairName.ToUpper().Split('_');
-                tradingPairTable[currencies.IndexOf(currencyIds[0]), currencies.IndexOf(currencyIds[1])] = TradingPairType.Sell;
-                tradingPairTable[currencies.IndexOf(currencyIds[1]), currencies.IndexOf(currencyIds[0])] = TradingPairType.Buy;
+                tradingPairTable[currencies.IndexOf(currencyIds[0]), currencies.IndexOf(currencyIds[1])] = TradingPairType.Buy;
+                tradingPairTable[currencies.IndexOf(currencyIds[1]), currencies.IndexOf(currencyIds[0])] = TradingPairType.Sell;
             }
 
             return (currencies, tradingPairTable);
         }
 
-        public static decimal[,] GetSpotPrices<TickerEntryT>(IReadOnlyDictionary<string, TickerEntryT> tradingPairs, IExchangeCurrencies currencies, decimal feeFraction, char separator = '_')
+        public static Ticker[,] GetTicker<TickerEntryT>(IReadOnlyDictionary<string, TickerEntryT> tradingPairs, IExchangeCurrencies currencies, char separator = '_')
             where TickerEntryT : ITickerEntry
         {
-            decimal[,] prices = new decimal[currencies.Count, currencies.Count];
+            Ticker[,] ticker = new Ticker[currencies.Count, currencies.Count];
 
             foreach (KeyValuePair<string, TickerEntryT> pair in tradingPairs)
             {
@@ -50,16 +50,16 @@ namespace AnarchocapitalismBot.Exchanges
                 // Debug.Assert(pair.Value.HighestBidPrice <= pair.Value.LowestAskPrice);
 
                 // c0_c1, c0/c1 = ask, c1 -> c0
-                prices[index0, index1] = pair.Value.HighestBidPrice * (1m - feeFraction); // apply fees
+                ticker[index0, index1] = new Ticker(pair.Value);
 
                 // c0_c1, c1/c0 = bid, c0 -> c1
                 if (pair.Value.LowestAskPrice != 0)
                 {
-                    prices[index1, index0] = 1m / pair.Value.LowestAskPrice * (1m - feeFraction); // apply fees
+                    ticker[index1, index0] = new Ticker(pair.Value).Flip();
                 }
             }
 
-            return prices;
+            return ticker;
         }
     }
 }

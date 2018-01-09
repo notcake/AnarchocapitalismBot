@@ -20,6 +20,7 @@ namespace AnarchocapitalismBot.Exchanges
         public IExchangeCurrencies Currencies { get; private set; } = null;
 
         // Trading pairs
+        public decimal FeePercentage => 0.2m;
         private TradingPairType[,] tradingPairs = null;
         public TradingPairType[,] TradingPairs => (TradingPairType[,])this.tradingPairs.Clone();
 
@@ -56,12 +57,24 @@ namespace AnarchocapitalismBot.Exchanges
         }
 
         // Trading pairs
-        public async Task<decimal[,]> GetSpotPrices()
+        public async Task<Ticker[,]> GetTicker()
         {
             if (!this.Connected) { throw new InvalidOperationException(); }
 
             Dictionary<string, ExmoExchange.TickerEntry> tradingPairs = await Json.DeserializeUrl<Dictionary<string, ExmoExchange.TickerEntry>>("https://api.exmo.com/v1/ticker/");
-            return Util.GetSpotPrices(tradingPairs, this.Currencies, 0.002m);
+            return Util.GetTicker(tradingPairs, this.Currencies);
+        }
+
+        public async Task<Exchanges.OrderBook> GetOrderBook((string, string) tradingPair)
+        {
+            if (!this.Connected) { throw new InvalidOperationException(); }
+            
+            Dictionary<string, ExmoExchange.OrderBook> orderBook = await Json.DeserializeUrl<Dictionary<string, ExmoExchange.OrderBook>>("https://api.exmo.com/v1/order_book/?pair=" + tradingPair.Item1 + "_" + tradingPair.Item2);
+            return new Exchanges.OrderBook
+            {
+                Asks = orderBook[tradingPair.Item1 + "_" + tradingPair.Item2].Ask.Select(x => new OrderBookEntry { Price = x[0], Quantity = x[1] }).ToArray(),
+                Bids = orderBook[tradingPair.Item1 + "_" + tradingPair.Item2].Bid.Select(x => new OrderBookEntry { Price = x[0], Quantity = x[1] }).ToArray()
+            };
         }
     }
 }
