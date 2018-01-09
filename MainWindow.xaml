@@ -67,17 +67,31 @@
                     <ListView.View>
                         <GridView>
                             <GridViewColumn Header="Pair"     DisplayMemberBinding="{Binding TradingPairName}"     Width="96"/>
+                            <GridViewColumn Header="" Width="60">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding BuyOrder.Quantity, StringFormat=0.00}" TextAlignment="Right"></TextBlock>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
                             <GridViewColumn Header="Bid" Width="80">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding Ticker.HighestBidPrice, StringFormat=0.00000000}" TextAlignment="Right"></TextBlock>
+                                        <TextBlock Text="{Binding BuyOrder.Price, StringFormat=0.00000000}" TextAlignment="Right"></TextBlock>
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <GridViewColumn Header="" Width="60">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding SellOrder.Quantity, StringFormat=0.00}" TextAlignment="Right"></TextBlock>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
                             <GridViewColumn Header="Ask" Width="80">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding Ticker.LowestAskPrice, StringFormat=0.00000000}" TextAlignment="Right"></TextBlock>
+                                        <TextBlock Text="{Binding SellOrder.Price, StringFormat=0.00000000}" TextAlignment="Right"></TextBlock>
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>

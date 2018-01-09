@@ -78,7 +78,7 @@ namespace AnarchocapitalismBot
             this.tickers = await exchange.GetTicker();
             
             Matrix<ArbitragePath> arbitrage1 = Matrix<Ticker>.FromArray(NullRing<Ticker>.Instance, this.tickers)
-                .Map(ArbitragePathSemiring.Instance, (y, x, value) =>
+                .Map(new ArbitragePathSemiring(false), (y, x, value) =>
                 {
                     decimal multiplier = 0;
                     if (value.LowestAskPrice != 0)
@@ -124,6 +124,9 @@ namespace AnarchocapitalismBot
                 this.CurrencyCyclesListView.SelectedIndex = selectedIndex;
                 this.suppressExecutionUpdate = false;
             });
+
+            this.executionCycle = (CurrencyCycleListViewItem?)this.CurrencyCyclesListView.SelectedItem;
+            await this.UpdateExecution();
         }
 
         CurrencyCycleListViewItem? executionCycle = null;
@@ -169,16 +172,24 @@ namespace AnarchocapitalismBot
                     }
 
                     Ticker ticker = tickers[item.Exchange.Currencies.IndexOf(tradingPair.Item1), item.Exchange.Currencies.IndexOf(tradingPair.Item2)];
-                    ticker = ticker.Update(await item.Exchange.GetOrderBook(tradingPair));
+                    OrderBook orderBook = await item.Exchange.GetOrderBook(tradingPair);
 
                     decimal destinationQuantity;
+                    OrderBookEntry buyOrder  = orderBook.Bids[0];
+                    OrderBookEntry sellOrder = orderBook.Asks[0];
                     if (type == TradeType.Buy)
                     {
-                        destinationQuantity = sourceQuantity / ticker.LowestAskPrice * (1m - item.Exchange.FeePercentage * 0.01m);
+                        // destinationQuantity = sourceQuantity / ticker.LowestAskPrice * (1m - item.Exchange.FeePercentage * 0.01m);
+                        // sellOrder.Price = ticker.LowestAskPrice;
+                        (destinationQuantity, sellOrder) = orderBook.ComputeBuyQuantity(sourceQuantity).Value;
+                        ticker.LowestAskPrice = sellOrder.Price;
                     }
                     else
                     {
-                        destinationQuantity = sourceQuantity * ticker.HighestBidPrice * (1m - item.Exchange.FeePercentage * 0.01m);
+                        // destinationQuantity = sourceQuantity * ticker.HighestBidPrice * (1m - item.Exchange.FeePercentage * 0.01m);
+                        // buyOrder.Price = ticker.HighestBidPrice;
+                        (destinationQuantity, buyOrder) = orderBook.ComputeSellCost(sourceQuantity).Value;
+                        ticker.HighestBidPrice = buyOrder.Price;
                     }
 
                     items.Add(new ExecutionListViewItem
@@ -188,6 +199,9 @@ namespace AnarchocapitalismBot
                         Type = type,
                         Price = type == TradeType.Buy ? ticker.LowestAskPrice : ticker.HighestBidPrice,
                         Ticker = ticker,
+                        OrderBook = orderBook,
+                        BuyOrder  = buyOrder,
+                        SellOrder = sellOrder,
                         SourceQuantity = sourceQuantity,
                         DestinationQuantity = destinationQuantity
                     });

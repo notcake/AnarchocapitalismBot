@@ -34,7 +34,7 @@ namespace AnarchocapitalismBot.Exchanges
             if (this.Connected) { return true; }
 
             GatecoinExchange.Tickers tickers = await Json.DeserializeUrl<GatecoinExchange.Tickers>("https://api.gatecoin.com/Public/LiveTickers");
-            (this.Currencies, this.tradingPairs) = Util.GetSupportedCurrenciesFromTradingPairs(tickers.TickerEntries.Select(x => x.CurrencyPair.Substring(0, 3) + "_" + x.CurrencyPair.Substring(4)));
+            (this.Currencies, this.tradingPairs) = Util.GetSupportedCurrenciesFromTradingPairs(tickers.TickerEntries.Select(x => (x.CurrencyPair.Substring(0, 3), x.CurrencyPair.Substring(3))));
 
             this.Connected = true;
 
@@ -65,7 +65,7 @@ namespace AnarchocapitalismBot.Exchanges
             Dictionary<string, ITickerEntry> tradingPairs = new Dictionary<string, ITickerEntry>();
             foreach (GatecoinExchange.TickerEntry tickerEntry in tickers.TickerEntries)
             {
-                tradingPairs[tickerEntry.CurrencyPair.Substring(0, 3) + "_" + tickerEntry.CurrencyPair.Substring(4)] = tickerEntry;
+                tradingPairs[tickerEntry.CurrencyPair.Substring(0, 3) + "_" + tickerEntry.CurrencyPair.Substring(3)] = tickerEntry;
             }
             return Util.GetTicker(tradingPairs, this.Currencies);
         }

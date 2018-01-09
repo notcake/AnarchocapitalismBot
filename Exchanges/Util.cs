@@ -11,24 +11,31 @@ namespace AnarchocapitalismBot.Exchanges
     {
         public static (IExchangeCurrencies, TradingPairType[,]) GetSupportedCurrenciesFromTradingPairs(IEnumerable<string> tradingPairs, char separator = '_')
         {
+            return Util.GetSupportedCurrenciesFromTradingPairs(tradingPairs.Select(x =>
+            {
+                string[] currencyIds = x.ToUpper().Split('_');
+                return (currencyIds[0], currencyIds[1]);
+            }));
+        }
+
+        public static (IExchangeCurrencies, TradingPairType[,]) GetSupportedCurrenciesFromTradingPairs(IEnumerable<(string, string)> tradingPairs)
+        {
             // Generate list of currencies
             HashSet<string> currencySet = new HashSet<string>();
-            foreach (string currencyPairName in tradingPairs)
+            foreach ((string, string) tradingPair in tradingPairs)
             {
-                string[] currencyIds = currencyPairName.ToUpper().Split('_');
-                currencySet.Add(currencyIds[0]);
-                currencySet.Add(currencyIds[1]);
+                currencySet.Add(tradingPair.Item1);
+                currencySet.Add(tradingPair.Item2);
             }
 
             IExchangeCurrencies currencies = new ExchangeCurrencies(currencySet);
 
             // Generate supported pairs
             TradingPairType[,] tradingPairTable = new TradingPairType[currencies.Count, currencies.Count];
-            foreach (string currencyPairName in tradingPairs)
+            foreach ((string, string) tradingPair in tradingPairs)
             {
-                string[] currencyIds = currencyPairName.ToUpper().Split('_');
-                tradingPairTable[currencies.IndexOf(currencyIds[0]), currencies.IndexOf(currencyIds[1])] = TradingPairType.Buy;
-                tradingPairTable[currencies.IndexOf(currencyIds[1]), currencies.IndexOf(currencyIds[0])] = TradingPairType.Sell;
+                tradingPairTable[currencies.IndexOf(tradingPair.Item1), currencies.IndexOf(tradingPair.Item2)] = TradingPairType.Buy;
+                tradingPairTable[currencies.IndexOf(tradingPair.Item2), currencies.IndexOf(tradingPair.Item1)] = TradingPairType.Sell;
             }
 
             return (currencies, tradingPairTable);
@@ -48,6 +55,10 @@ namespace AnarchocapitalismBot.Exchanges
                 uint index1 = (uint)currencies.IndexOf(currencyIds[1]);
 
                 // Debug.Assert(pair.Value.HighestBidPrice <= pair.Value.LowestAskPrice);
+                if (pair.Value.HighestBidPrice > pair.Value.LowestAskPrice)
+                {
+                    Debug.WriteLine(pair.Key + ": " + pair.Value.HighestBidPrice.ToString() + " to " + pair.Value.LowestAskPrice.ToString());
+                }
 
                 // c0_c1, c0/c1 = ask, c1 -> c0
                 ticker[index0, index1] = new Ticker(pair.Value);

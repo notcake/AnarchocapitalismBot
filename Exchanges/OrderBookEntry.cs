@@ -8,8 +8,8 @@ namespace AnarchocapitalismBot.Exchanges
 {
     public struct OrderBookEntry
     {
-        public decimal Price;
-        public decimal Quantity;
+        public decimal Price    { get; set; }
+        public decimal Quantity { get; set; }
 
         public OrderBookEntry WithQuantity(decimal quantity)
         {

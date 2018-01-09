@@ -71,6 +71,9 @@
     <Compile Include="ArbitragePath.cs" />
     <Compile Include="ArbitragePathSemiring.cs" />
     <Compile Include="CurrencyCycleListViewItem.cs" />
+    <Compile Include="Exchanges\BinanceExchange.cs" />
+    <Compile Include="Exchanges\BinanceExchange.OrderBook.cs" />
+    <Compile Include="Exchanges\BinanceExchange.TickerEntry.cs" />
     <Compile Include="Exchanges\ExmoExchange.OrderBook.cs" />
     <Compile Include="Exchanges\ExxExchange.OrderBook.cs" />
     <Compile Include="Exchanges\GatecoinExchange.OrderBook.cs" />

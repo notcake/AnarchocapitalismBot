@@ -14,6 +14,9 @@ namespace AnarchocapitalismBot
         public (string, string) TradingPair { get; set; }
         public string TradingPairName => this.TradingPair.Item1 + "/" + this.TradingPair.Item2;
         public Ticker Ticker { get; set; }
+        public OrderBook OrderBook { get; set; }
+        public OrderBookEntry BuyOrder  { get; set; }
+        public OrderBookEntry SellOrder { get; set; }
 
         public TradeType Type { get; set; }
         public decimal Price { get; set; }

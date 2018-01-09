@@ -9,7 +9,12 @@ namespace AnarchocapitalismBot
 {
     public class ArbitragePathSemiring : Semiring<ArbitragePath>
     {
-        public ArbitragePathSemiring() { }
+        public bool SubcyclesFiltered { get; }
+
+        public ArbitragePathSemiring(bool filterSubcycles)
+        {
+            this.SubcyclesFiltered = filterSubcycles;
+        }
 
         // ISemiring<decimal>
         // Equality
@@ -24,11 +29,14 @@ namespace AnarchocapitalismBot
         /// <returns></returns>
         public override ArbitragePath Add(ArbitragePath a, ArbitragePath b)
         {
-            bool aInteresting = !a.HasStrictSubcycle;
-            bool bInteresting = !b.HasStrictSubcycle;
+            if (this.SubcyclesFiltered)
+            {
+                bool aInteresting = !a.HasStrictSubcycle;
+                bool bInteresting = !b.HasStrictSubcycle;
 
-            if ( aInteresting && !bInteresting) { return a; }
-            if (!aInteresting &&  bInteresting) { return b; }
+                if (aInteresting && !bInteresting) { return a; }
+                if (!aInteresting && bInteresting) { return b; }
+            }
 
             return ArbitragePath.Best(a, b);
         }
@@ -45,7 +53,5 @@ namespace AnarchocapitalismBot
         // Identities
         public override ArbitragePath AdditiveIdentity       => new ArbitragePath(0, new List<string>());
         public override ArbitragePath MultiplicativeIdentity => new ArbitragePath(1, new List<string>());
-
-        public static ISemiring<ArbitragePath> Instance => new ArbitragePathSemiring();
     }
 }

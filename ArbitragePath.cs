@@ -82,7 +82,5 @@ namespace AnarchocapitalismBot
 
         public static bool operator ==(ArbitragePath a, ArbitragePath b) => a.Equals(b);
         public static bool operator !=(ArbitragePath a, ArbitragePath b) => !a.Equals(b);
-
-        public static ISemiring<ArbitragePath> Semiring => ArbitragePathSemiring.Instance;
     }
 }

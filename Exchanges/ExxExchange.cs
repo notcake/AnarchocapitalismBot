@@ -62,7 +62,13 @@ namespace AnarchocapitalismBot.Exchanges
             if (!this.Connected) { throw new InvalidOperationException(); }
 
             Dictionary<string, ExxExchange.TickerEntry> tradingPairs = await Json.DeserializeUrl<Dictionary<string, ExxExchange.TickerEntry>>("https://api.exx.com/data/v1/tickers");
-            return Util.GetTicker(tradingPairs, this.Currencies);
+            Ticker[,] ticker = Util.GetTicker(tradingPairs, this.Currencies);
+
+            // QASH/ETH is completely illiquid, so ignore it
+            ticker[this.Currencies.IndexOf("QASH"), this.Currencies.IndexOf("ETH")] = new Ticker();
+            ticker[this.Currencies.IndexOf("ETH"), this.Currencies.IndexOf("QASH")] = new Ticker();
+
+            return ticker;
         }
 
         public async Task<Exchanges.OrderBook> GetOrderBook((string, string) tradingPair)
