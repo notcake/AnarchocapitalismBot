@@ -43,7 +43,7 @@ namespace AnarchocapitalismBot
 
         public override ArbitragePath Multiply(ArbitragePath a, ArbitragePath b)
         {
-            // Don't bother building paths if the reuslt is a 0.
+            // Don't bother building paths if the result is a 0.
             if (a.Multiplier == 0) { return a; }
             if (b.Multiplier == 0) { return b; }
 
